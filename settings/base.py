@@ -35,6 +35,12 @@ DJANGO_AND_THIRD_PARTY_APPS = [
 
 PROJECT_APPS = [
     "apps.auths",
+    "apps.chats.apps.ChatsConfig",
+    "apps.communities.apps.CommunitiesConfig",
+    "apps.medias.apps.MediasConfig",
+    "apps.notifications.apps.NotificationsConfig",
+    "apps.posts.apps.PostsConfig",
+    "apps.abstracts.apps.AbstractsConfig",
 ]
 
 INSTALLED_APPS = DJANGO_AND_THIRD_PARTY_APPS + PROJECT_APPS

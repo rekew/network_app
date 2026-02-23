@@ -1,11 +1,13 @@
 # Python modules
 from typing import Any
+
 # Django modules
 from django.db.models import (
     EmailField,
     CharField,
     DateTimeField,
     BooleanField,
+    OneToOneField, CASCADE, TextField, JSONField,
 )
 from django.contrib.auth.models import (
     BaseUserManager,
@@ -15,6 +17,8 @@ from django.contrib.auth.models import (
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 
+# Project Modules
+from apps.abstracts.models import Abstract
 
 class CustomUserManager(BaseUserManager):
     """
@@ -104,6 +108,37 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self) -> str:
         return f"{self.email}"
+
+
+class Profile(Abstract):
+    DISPLAY_MAX_LENGTH=255
+    user = OneToOneField(
+        CustomUser,
+        on_delete=CASCADE,
+        related_name='profile',
+    )
+    display_name = CharField(
+        max_length=DISPLAY_MAX_LENGTH,
+        blank=True,
+    )
+    bio = TextField(
+        blank=True,
+    )
+    interests = JSONField(
+        blank=True,
+        null=True,
+    )
+    is_verified = BooleanField(
+        default=False,
+    )
+
+    def __str__(self):
+        return self.display_name
+
+
+
+
+
 
 
 
