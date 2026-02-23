@@ -9,5 +9,5 @@ ENV_POSSIBLE_OPTIONS = (
     "prod",
 )
 
-ENV_ID = config("LUMI_ENV_ID", cast=str)
-SECRET_KEY = config("LUMI_SECRET_KEY", cast=str)
+ENV_ID = config("LUMI_ENV_ID", cast=str, default="local")
+SECRET_KEY = config("LUMI_SECRET_KEY", cast=str, default="local")
