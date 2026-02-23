@@ -26,7 +26,9 @@ DJANGO_AND_THIRD_PARTY_APPS = [
     'django.contrib.staticfiles',
 ]
 
-PROJECT_APPS = []
+PROJECT_APPS = [
+    "apps.auths",
+]
 
 INSTALLED_APPS = DJANGO_AND_THIRD_PARTY_APPS + PROJECT_APPS
 
