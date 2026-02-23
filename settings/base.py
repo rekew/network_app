@@ -2,6 +2,7 @@
 import os
 # Project modules
 from settings.conf import *
+from datetime import timedelta
 
 
 # ----------------------------------------------
@@ -14,17 +15,22 @@ ASGI_APPLICATION = 'settings.asgi.application'
 AUTH_USER_MODEL = "auths.CustomUser"
 
 
-
 # --------------------------------
 # Apps
 # -----
 DJANGO_AND_THIRD_PARTY_APPS = [
+    # DJANGO MODULES
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # THIRD PARTY MODULES
+
+    'rest_framework',
 ]
 
 PROJECT_APPS = [
@@ -77,7 +83,19 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# ----------------------------------------------------------------
+# REST Framework and JWT
+# -----
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
 
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
 
 # ----------------------------------------------------------------
 # Internationalization
