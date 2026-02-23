@@ -7,7 +7,11 @@ from django.db.models import (
     CharField,
     DateTimeField,
     BooleanField,
-    OneToOneField, CASCADE, TextField, JSONField,
+    OneToOneField,
+    CASCADE,
+    TextField,
+    JSONField,
+    Model, ForeignKey, UUIDField, SET_NULL,
 )
 from django.contrib.auth.models import (
     BaseUserManager,
@@ -19,6 +23,7 @@ from django.contrib.auth.password_validation import validate_password
 
 # Project Modules
 from apps.abstracts.models import Abstract
+
 
 class CustomUserManager(BaseUserManager):
     """
@@ -134,6 +139,113 @@ class Profile(Abstract):
 
     def __str__(self):
         return self.display_name
+
+
+class UserBlock(Model):
+
+    REASON_MAX_LENGTH=255
+
+    blocker = ForeignKey(
+        CustomUser,
+        on_delete=CASCADE,
+        related_name='blocked_users'
+    )
+
+    blocked = ForeignKey(
+        CustomUser,
+        on_delete=CASCADE,
+        related_name="blocked_by_users"
+    )
+
+    reason = CharField(
+        max_length=REASON_MAX_LENGTH,
+        blank=True,
+    )
+
+    blocked_at = DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        unique_together = ("blocked", "blocker")
+
+
+class ActivityLog(Abstract):
+    ACTION_TYPES = [
+        ("login", "Login"),
+        ("logout", "Logout"),
+        ("post_create", "Post Created"),
+        ("post_delete", "Post Deleted"),
+        ("comment_create", "Commet Created"),
+        ("password_change", "Password Changed"),
+    ]
+    USER_AGENT_MAX_LENGTH = 255
+    ACTION_TYPE_MAX_LENGTH=50
+
+    user = ForeignKey(
+        CustomUser,
+        on_delete=CASCADE,
+        related_name="activities",
+    )
+
+    details = TextField(
+        blank=True,
+    )
+
+    user_agent = CharField(
+        max_length=USER_AGENT_MAX_LENGTH,
+        blank=True,
+    )
+
+    action_type = CharField(
+        max_length=ACTION_TYPE_MAX_LENGTH,
+        choices=ACTION_TYPES,
+    )
+
+
+class Report(Model):
+
+    CONTENT_MAX_LENGTH = 50
+    STATUS_MAX_LENGTH = 20
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("reviewed", "Reviewed"),
+        ("rejected", "Rejected"),
+        ("resolved", "Resolved"),
+    ]
+
+    reporter = ForeignKey(
+        CustomUser,
+        on_delete=CASCADE,
+        related_name="reports"
+    )
+
+    content_type = CharField(
+        max_length=CONTENT_MAX_LENGTH,
+    )
+
+    object_type = UUIDField()
+
+    reason = TextField()
+
+    status = CharField(
+        max_length=STATUS_MAX_LENGTH,
+        choices=STATUS_CHOICES,
+        default="pending"
+    )
+
+    handled_by = ForeignKey(
+        CustomUser,
+        on_delete=SET_NULL,
+        null=True,
+        blank=True,
+        related_name="handled_reports"
+    )
+
+    created_at = DateTimeField(
+        auto_now_add=True,
+    )
+
 
 
 

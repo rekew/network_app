@@ -14,11 +14,19 @@ WSGI_APPLICATION = 'settings.wsgi.application'
 ASGI_APPLICATION = 'settings.asgi.application'
 AUTH_USER_MODEL = "auths.CustomUser"
 
+# ----------------------------------------------------------------
+# Static files
+# -----
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 
 # --------------------------------
 # Apps
 # -----
 DJANGO_AND_THIRD_PARTY_APPS = [
+    # UNFOLD
+    'unfold',
     # DJANGO MODULES
 
     'django.contrib.admin',
@@ -62,10 +70,13 @@ MIDDLEWARE = [
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),  # ВАЖНО: добавьте эту строку!
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',  # добавьте для отладки
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -114,8 +125,25 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Важно! Для правильной работы Unfold
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
 
 # ----------------------------------------------------------------
-# Static files
+# Unfold Files
 # -----
-STATIC_URL = 'static/'
+UNFOLD = {
+    "SITE_TITLE": "Network Admin",
+    "SITE_HEADER": "Network App",
+    "SITE_SUBHEADER": "Management Panel",
+    "SITE_URL": "/",
+    "THEME": "dark", # Теперь это будет работать правильно
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+} # Точка удалена
