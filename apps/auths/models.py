@@ -82,12 +82,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     """
     Custom authentication user model
     """
-    EMAIL_MAX_LENGHT = 150
-    USERNAME_MAX_LENGHT = 150
+    EMAIL_MAX_LENGTH = 150
+    USERNAME_MAX_LENGTH = 150
     
 
-    email = EmailField(max_length=EMAIL_MAX_LENGHT, unique=True)
-    username = CharField(max_length=USERNAME_MAX_LENGHT, unique=True)
+    email = EmailField(max_length=EMAIL_MAX_LENGTH, unique=True)
+    username = CharField(max_length=USERNAME_MAX_LENGTH, unique=True)
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
     is_active = BooleanField(default=True)
