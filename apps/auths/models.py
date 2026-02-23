@@ -87,7 +87,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     
 
     email = EmailField(max_length=EMAIL_MAX_LENGHT, unique=True)
-    username = CharField(max_length=USERNAME_MAX_LENGHT)
+    username = CharField(max_length=USERNAME_MAX_LENGHT, unique=True)
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
     is_active = BooleanField(default=True)
