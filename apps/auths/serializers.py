@@ -20,7 +20,7 @@ class CustomUserSerializer(ModelSerializer):
         fields = [
             "id",
             "email",
-            "username"
+            "username",
             "created_at",
             "updated_at",
         ]
