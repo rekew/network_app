@@ -39,6 +39,8 @@ class CustomUserManager(BaseUserManager):
     ):
         if not email:
             raise ValidationError(message="Email field is required")
+        if not username:
+            raise ValidationError(message="username field is required")
         new_user: "CustomUser" = self.model(
             email=self.normalize_email(email),
             username=username,
@@ -87,7 +89,7 @@ class CustomUserManager(BaseUserManager):
         return new_superuser
     
 
-class CustomUser(AbstractBaseUser, PermissionsMixin):
+class CustomUser(AbstractBaseUser, PermissionsMixin, Abstract):
     """
     Custom authentication user model
     """
