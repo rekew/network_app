@@ -3,7 +3,14 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 
 # PROJECT MODULES
-from .models import CustomUser, Profile, Friendship
+from .models import (
+    ActivityLog,
+    CustomUser,
+    Friendship,
+    Profile,
+    Report,
+    UserBlock,
+)
 
 # THIRD PARTY MODULES
 from rest_framework.serializers import ModelSerializer, ValidationError
@@ -117,3 +124,47 @@ class DeleteFriendShipSerializer(ModelSerializer):
     class Meta:
         model = Friendship
         read_only_fields = ("id",)
+
+
+class UserBlockSerializer(ModelSerializer):
+    class Meta:
+        model = UserBlock
+        fields = ("id", "blocker", "blocked", "reason", "blocked_at")
+        read_only_fields = ("id", "blocker", "blocked_at")
+
+
+class ActivityLogSerializer(ModelSerializer):
+    class Meta:
+        model = ActivityLog
+        fields = (
+            "id",
+            "user",
+            "details",
+            "user_agent",
+            "action_type",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("id", "user", "created_at", "updated_at")
+
+
+class ReportSerializer(ModelSerializer):
+    class Meta:
+        model = Report
+        fields = (
+            "id",
+            "reporter",
+            "content_type",
+            "object_type",
+            "reason",
+            "status",
+            "handled_by",
+            "created_at",
+        )
+        read_only_fields = (
+            "id",
+            "reporter",
+            "status",
+            "handled_by",
+            "created_at",
+        )
