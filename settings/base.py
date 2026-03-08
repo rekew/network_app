@@ -27,8 +27,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 DJANGO_AND_THIRD_PARTY_APPS = [
     # UNFOLD
     'unfold',
-    # DJANGO MODULES
 
+    # DJANGO MODULES
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -37,7 +37,6 @@ DJANGO_AND_THIRD_PARTY_APPS = [
     'django.contrib.staticfiles',
 
     # THIRD PARTY MODULES
-
     'rest_framework',
     'drf_spectacular',
 ]
