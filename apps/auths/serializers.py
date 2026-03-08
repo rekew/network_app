@@ -1,4 +1,5 @@
 # DJANGO MODULES
+from .models import CustomUser, Profile
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 
@@ -42,6 +43,7 @@ class UpdateUserSerializer(ModelSerializer):
             "password": {"required": False},
         }
 
+
 class DeleteUserSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
@@ -52,6 +54,7 @@ class DeleteUserSerializer(ModelSerializer):
             "email": {"write_only": True},
             "password": {"write_only": True},
         }
+
 
 class RegisterSerializer(ModelSerializer):
     class Meta:
@@ -79,4 +82,26 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return {
             "refresh": str(refresh),
             "access": str(refresh.access_token),
+        }
+
+
+class ProfileSerializer(ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ("id", "display_name", "bio", "interests", "is_verified")
+        extra_kwargs = {
+            "id":          {"read_only": True},
+            "is_verified": {"read_only": True}, 
+        }
+
+
+class UpdateProfileSerializer(ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ("id", "display_name", "bio", "interests")
+        extra_kwargs = {
+            "id":           {"read_only": True},
+            "display_name": {"required": False},
+            "bio":          {"required": False},
+            "interests":    {"required": False},
         }
