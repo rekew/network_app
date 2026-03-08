@@ -24,13 +24,39 @@ class CustomUserSerializer(ModelSerializer):
             "created_at",
             "updated_at",
         ]
+        read_only_fields = [
+            "id",
+            "created_at",
+            "updated_at",
+        ]
 
+
+class UpdateUserSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ("id", "username", "email", "password",)
+        extra_kwargs = {
+            "id": {"read_only": True},
+            "username": {"required": False},
+            "email": {"required": False},
+            "password": {"required": False},
+        }
+
+class DeleteUserSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ("id", "username", "email", "password",)
+        extra_kwargs = {
+            "id": {"write_only": True},
+            "username": {"write_only": True},
+            "email": {"write_only": True},
+            "password": {"write_only": True},
+        }
 
 class RegisterSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ("username", "email", "password")
-        extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
         user = CustomUser.objects.create_user(**validated_data)
