@@ -19,10 +19,12 @@ from .serializers import (
     CustomTokenObtainPairSerializer,
     CustomUserSerializer,
     DeleteUserSerializer,
+    ProfileSerializer,
     RegisterSerializer,
+    UpdateProfileSerializer,
     UpdateUserSerializer,
 )
-from .models import CustomUser
+from .models import CustomUser, Profile
 
 
 class RegisterView(CreateAPIView):
@@ -69,5 +71,60 @@ class UserDeleteView(DestroyAPIView):
         instance = self.get_object()
         instance.deleted_at = timezone.now()
         instance.is_active = False
+        instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ProfileCreateView(CreateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class ProfileDetailView(RetrieveAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "id"
+
+    def get_queryset(self):
+        return Profile.objects.filter(
+            user=self.request.user,
+            deleted_at__isnull=True
+        )
+
+class ProfileUpdateView(UpdateAPIView):
+    serializer_class = UpdateProfileSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "id"
+
+    def get_queryset(self):
+        return Profile.objects.filter(
+            user=self.request.user,
+            deleted_at__isnull=True
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ProfileDeleteView(DestroyAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "id"
+
+    def get_queryset(self):
+        return Profile.objects.filter(
+            user=self.request.user,
+            deleted_at__isnull=True
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.deleted_at = timezone.now()
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
