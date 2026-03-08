@@ -1,10 +1,9 @@
 # DJANGO MODULES
-from .models import CustomUser, Profile
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 
 # PROJECT MODULES
-from apps.auths.models import CustomUser
+from .models import CustomUser, Profile, Friendship
 
 # THIRD PARTY MODULES
 from rest_framework.serializers import ModelSerializer, ValidationError
@@ -91,7 +90,7 @@ class ProfileSerializer(ModelSerializer):
         fields = ("id", "display_name", "bio", "interests", "is_verified")
         extra_kwargs = {
             "id":          {"read_only": True},
-            "is_verified": {"read_only": True}, 
+            "is_verified": {"read_only": True},
         }
 
 
@@ -105,3 +104,16 @@ class UpdateProfileSerializer(ModelSerializer):
             "bio":          {"required": False},
             "interests":    {"required": False},
         }
+
+
+class FriendshipSerializer(ModelSerializer):
+    class Meta:
+        model = Friendship
+        fields = ("id", "sender", "receiver", "status", "created_at")
+        read_only_fields = ("id", "sender", "status", "created_at")
+
+
+class DeleteFriendShipSerializer(ModelSerializer):
+    class Meta:
+        model = Friendship
+        read_only_fields = ("id",)

@@ -1,13 +1,16 @@
 # DJANGO MODULES
 from django.utils import timezone
+from django.db import models
 
 # THIRD PARTY MODULES
 
 from rest_framework.generics import (
     CreateAPIView,
     DestroyAPIView,
+    ListAPIView,
     RetrieveAPIView,
     UpdateAPIView,
+    ValidationError,
 )
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
@@ -23,8 +26,9 @@ from .serializers import (
     RegisterSerializer,
     UpdateProfileSerializer,
     UpdateUserSerializer,
+    FriendshipSerializer,
 )
-from .models import CustomUser, Profile
+from .models import CustomUser, Friendship, Profile
 
 
 class RegisterView(CreateAPIView):
@@ -82,6 +86,7 @@ class ProfileCreateView(CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
 class ProfileDetailView(RetrieveAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -92,6 +97,7 @@ class ProfileDetailView(RetrieveAPIView):
             user=self.request.user,
             deleted_at__isnull=True
         )
+
 
 class ProfileUpdateView(UpdateAPIView):
     serializer_class = UpdateProfileSerializer
@@ -112,6 +118,7 @@ class ProfileUpdateView(UpdateAPIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class ProfileDeleteView(DestroyAPIView):
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -128,3 +135,35 @@ class ProfileDeleteView(DestroyAPIView):
         instance.deleted_at = timezone.now()
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class FriendshipCreateView(CreateAPIView):
+    serializer_class = FriendshipSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        receiver_id = self.request.data.get("receiver_id")
+        if receiver_id is None:
+            raise ValidationError("receiver_id is required")
+        if receiver_id == self.request.user.id:
+            raise ValidationError("You cannot send a friend request to yourself")
+        serializer.save(sender=self.request.user, receiver_id=receiver_id)
+
+class FriendshipListView(ListAPIView):
+    serializer_class = FriendshipSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Friendship.objects.filter(
+            models.Q(sender=self.request.user) | models.Q(receiver=self.request.user),
+            deleted_at__isnull=True
+        )
+
+class FriendshipDeleteView(DestroyAPIView):
+    serializer_class = FriendshipSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "id"
+
+    def get_queryset(self):
+        return Friendship.objects.filter(
+            models.Q(sender=self.request.user) | models.Q(receiver=self.request.user)
+        )

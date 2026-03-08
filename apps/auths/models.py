@@ -48,7 +48,7 @@ class CustomUserManager(BaseUserManager):
             **kwargs,
         )
         return new_user
-    
+
     def create_user(
         self,
         email: str,
@@ -56,7 +56,7 @@ class CustomUserManager(BaseUserManager):
         password: str,
         **kwargs: dict[str, Any],
     ):
-        new_user=self.__obtain_user_instance(
+        new_user = self.__obtain_user_instance(
             email=email,
             username=username,
             password=password,
@@ -65,7 +65,6 @@ class CustomUserManager(BaseUserManager):
         new_user.set_password(password)
         new_user.save(using=self._db)
         return new_user
-    
 
     def create_superuser(
         self,
@@ -74,7 +73,7 @@ class CustomUserManager(BaseUserManager):
         password: str,
         **kwargs: dict[str, Any],
     ):
-        new_superuser=self.__obtain_user_instance(
+        new_superuser = self.__obtain_user_instance(
             email=email,
             username=username,
             password=password,
@@ -87,7 +86,7 @@ class CustomUserManager(BaseUserManager):
         new_superuser.set_password(password)
         new_superuser.save(using=self._db)
         return new_superuser
-    
+
 
 class CustomUser(AbstractBaseUser, PermissionsMixin, Abstract):
     """
@@ -95,7 +94,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin, Abstract):
     """
     EMAIL_MAX_LENGTH = 150
     USERNAME_MAX_LENGTH = 150
-    
 
     email = EmailField(max_length=EMAIL_MAX_LENGTH, unique=True)
     username = CharField(max_length=USERNAME_MAX_LENGTH, unique=True)
@@ -116,7 +114,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin, Abstract):
 
 
 class Profile(Abstract):
-    DISPLAY_MAX_LENGTH=255
+    DISPLAY_MAX_LENGTH = 255
     user = OneToOneField(
         CustomUser,
         on_delete=CASCADE,
@@ -143,7 +141,7 @@ class Profile(Abstract):
 
 class UserBlock(Model):
 
-    REASON_MAX_LENGTH=255
+    REASON_MAX_LENGTH = 255
 
     blocker = ForeignKey(
         CustomUser,
@@ -180,7 +178,7 @@ class ActivityLog(Abstract):
         ("password_change", "Password Changed"),
     ]
     USER_AGENT_MAX_LENGTH = 255
-    ACTION_TYPE_MAX_LENGTH=50
+    ACTION_TYPE_MAX_LENGTH = 50
 
     user = ForeignKey(
         CustomUser,
@@ -247,12 +245,35 @@ class Report(Model):
     )
 
 
+class Friendship(Model):
+    STATUS_CHOICES = [
+        ("pending",  "Pending"),
+        ("accepted", "Accepted"),
+        ("rejected", "Rejected"),
+    ]
+    STATUS_MAX_LENGTH = 10
 
+    sender = ForeignKey(
+        CustomUser,
+        on_delete=CASCADE,
+        related_name="sent_friendships"
+    )
 
+    receiver = ForeignKey(
+        CustomUser,
+        on_delete=CASCADE,
+        related_name="received_friendships"
+    )
 
+    status = CharField(
+        max_length=STATUS_MAX_LENGTH,
+        choices=STATUS_CHOICES,
+        default="pending"
+    )
 
+    created_at = DateTimeField(
+        auto_now_add=True,
+    )
 
-
-
-
-
+    class Meta:
+        unique_together = ("sender", "receiver")
