@@ -38,6 +38,7 @@ DJANGO_AND_THIRD_PARTY_APPS = [
 
     # THIRD PARTY MODULES
     'rest_framework',
+    'drf_spectacular',
 ]
 
 PROJECT_APPS = [
@@ -106,6 +107,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -128,7 +130,6 @@ USE_TZ = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Важно! Для правильной работы Unfold
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
@@ -142,7 +143,17 @@ UNFOLD = {
     "SITE_HEADER": "Network App",
     "SITE_SUBHEADER": "Management Panel",
     "SITE_URL": "/",
-    "THEME": "dark", # Теперь это будет работать правильно
+    "THEME": "dark", 
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
-} # Точка удалена
+} 
+
+# ----------------------------------------------------------------
+# Spectacular
+# -----
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Network App API',
+    'DESCRIPTION': 'API documentation for Network App',
+    'VERSION': '1.0.0',
+}
