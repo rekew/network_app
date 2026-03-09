@@ -37,12 +37,13 @@ DJANGO_AND_THIRD_PARTY_APPS = [
     'django.contrib.staticfiles',
 
     # THIRD PARTY MODULES
+
     'rest_framework',
     'drf_spectacular',
 ]
 
 PROJECT_APPS = [
-    "apps.auths",
+    "apps.auths.apps.AuthsConfig",
     "apps.chats.apps.ChatsConfig",
     "apps.communities.apps.CommunitiesConfig",
     "apps.notifications.apps.NotificationsConfig",

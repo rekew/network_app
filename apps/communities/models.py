@@ -44,6 +44,10 @@ class Community(Abstract):
         related_name="owned_communities"
     )
 
+    class Meta:
+        verbose_name = "Community"
+        verbose_name_plural = "Communities"
+
 
 class CommunityMembership(Model):
     ROLE_CHOICES = [

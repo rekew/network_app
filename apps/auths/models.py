@@ -112,7 +112,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin, Abstract):
     objects: CustomUserManager = CustomUserManager()
 
     class Meta:
-        db_table = "users"
+        # db_table = "users"
         verbose_name = "User"
         verbose_name_plural = "Users"
 
