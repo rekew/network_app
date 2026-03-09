@@ -1,3 +1,6 @@
+# PYTHON MODULES
+from typing import Any
+
 # DJANGO MODULES
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -21,11 +24,8 @@ from django.db.models import (
     UUIDField,
 )
 
-# THIRD PARTY AND PYTHON MODULES
-from typing import Any
-
 # PROJECT MODULES
-from .models import Abstract
+from apps.abstracts.models import Abstract
 
 
 class CustomUserManager(BaseUserManager):
