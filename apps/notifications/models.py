@@ -1,22 +1,33 @@
-# Django Modules
+# DJANGO MODULES
 from django.db.models import (
-    ForeignKey, CASCADE, TextField,
-    BooleanField, CharField, UUIDField
+    BooleanField,
+    CASCADE,
+    CharField,
+    ForeignKey,
+    TextField,
+    UUIDField,
 )
 
-# Project Modules
+# PROJECT MODULES
 from apps.abstracts.models import Abstract
 from apps.auths.models import CustomUser
 
 
 class Notification(Abstract):
+    """Notification sent from one user to another."""
 
-    CONTENT_MAX_LENGTH=50
+    CONTENT_MAX_LENGTH = 50
+
+    sender = ForeignKey(
+        CustomUser,
+        on_delete=CASCADE,
+        related_name="sent_notifications",
+    )
 
     user = ForeignKey(
         CustomUser,
         on_delete=CASCADE,
-        related_name="notifications"
+        related_name="notifications",
     )
 
     content = TextField()

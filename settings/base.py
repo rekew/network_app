@@ -27,8 +27,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 DJANGO_AND_THIRD_PARTY_APPS = [
     # UNFOLD
     'unfold',
-    # DJANGO MODULES
 
+    # DJANGO MODULES
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -37,7 +37,6 @@ DJANGO_AND_THIRD_PARTY_APPS = [
     'django.contrib.staticfiles',
 
     # THIRD PARTY MODULES
-
     'rest_framework',
     'drf_spectacular',
 ]
@@ -46,7 +45,6 @@ PROJECT_APPS = [
     "apps.auths",
     "apps.chats.apps.ChatsConfig",
     "apps.communities.apps.CommunitiesConfig",
-    "apps.medias.apps.MediasConfig",
     "apps.notifications.apps.NotificationsConfig",
     "apps.posts.apps.PostsConfig",
     "apps.abstracts.apps.AbstractsConfig",
@@ -109,6 +107,10 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "ENUM_NAME_OVERRIDES": {
+        "ReportStatusEnum": "yourapp.models.Report.STATUS_CHOICES",
+        "FriendshipStatusEnum": "yourapp.models.Friendship.STATUS_CHOICES",
+    }
 }
 
 SIMPLE_JWT = {
@@ -144,10 +146,10 @@ UNFOLD = {
     "SITE_HEADER": "Network App",
     "SITE_SUBHEADER": "Management Panel",
     "SITE_URL": "/",
-    "THEME": "dark", 
+    "THEME": "dark",
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
-} 
+}
 
 # ----------------------------------------------------------------
 # Spectacular
