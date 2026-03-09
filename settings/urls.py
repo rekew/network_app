@@ -12,6 +12,7 @@ urlpatterns = [
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/", include("apps.auths.urls")),
     path("api/", include("apps.notifications.urls")),
+    path("api/", include("apps.posts.urls")),
 
     # API url docs
     path('api/docs/schema/', SpectacularAPIView.as_view(), name='schema'),
