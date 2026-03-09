@@ -11,7 +11,6 @@ from .views import (
     FriendshipCreateView,
     FriendshipDeleteView,
     FriendshipListView,
-    ProfileCreateView,
     ProfileDeleteView,
     ProfileDetailView,
     ProfileUpdateView,
@@ -38,7 +37,6 @@ urlpatterns = [
     path("users/<int:id>/delete/",   UserDeleteView.as_view()),
 
     # Profiles
-    path("profiles/create/",          ProfileCreateView.as_view()),
     path("profiles/<int:id>/",        ProfileDetailView.as_view()),
     path("profiles/<int:id>/update/", ProfileUpdateView.as_view()),
     path("profiles/<int:id>/delete/", ProfileDeleteView.as_view()),
