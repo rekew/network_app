@@ -1,6 +1,12 @@
 asgiref==3.11.1
+<<<<<<< Updated upstream
 Django==6.0.2
 django-unfold==0.83.1
+=======
+attrs==25.4.0
+Django==6.0.3
+django-unfold==0.80.2
+>>>>>>> Stashed changes
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
 pillow==12.1.1
