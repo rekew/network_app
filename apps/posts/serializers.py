@@ -54,7 +54,7 @@ class CommentSerializer(ModelSerializer):
             )
     def get_replies(self, obj) -> list[dict]:
 
-    def get_replies(self, obj) -> list[dict]:
+    def get_replies(self, obj):
         qs = obj.replies.all()
         return CommentSerializer(qs, many=True).data
     
