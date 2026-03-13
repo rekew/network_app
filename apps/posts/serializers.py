@@ -5,6 +5,7 @@ from rest_framework.serializers import (
     SerializerMethodField,
     ValidationError,
 )
+from drf_spectacular.utils import extend_schema_field
 # Project modules
 from apps.posts.models import (
     Post, Comment, Reaction,
@@ -48,8 +49,7 @@ class CommentSerializer(ModelSerializer):
             "id", "author", "created_at", 
             "updated_at", "deleted_at",
             )
-
-    def get_replies(self, obj):
+    def get_replies(self, obj) -> list[dict]:
         qs = obj.replies.all()
         return CommentSerializer(qs, many=True).data
     
