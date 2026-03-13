@@ -37,6 +37,7 @@ DJANGO_AND_THIRD_PARTY_APPS = [
     'django.contrib.staticfiles',
 
     # THIRD PARTY MODULES
+    'corsheaders',
 
     'rest_framework',
     'drf_spectacular',
@@ -58,6 +59,7 @@ INSTALLED_APPS = DJANGO_AND_THIRD_PARTY_APPS + PROJECT_APPS
 # Middleware | Templates | Validators
 #
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -161,3 +163,13 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API documentation for Network App',
     'VERSION': '1.0.0',
 }
+
+# ----------------------------------------------------------------
+# CORS Settings
+# -----
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",  
+    "http://127.0.0.1:3000",
+]
+CORS_ALLOW_CREDENTIALS = True
