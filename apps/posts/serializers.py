@@ -49,7 +49,7 @@ class CommentSerializer(ModelSerializer):
             "updated_at", "deleted_at",
             )
 
-    def get_replies(self, obj):
+    def get_replies(self, obj) -> list[dict]:
         qs = obj.replies.all()
         return CommentSerializer(qs, many=True).data
     
