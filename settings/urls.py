@@ -11,8 +11,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 
-    # users
-    path("", include("apps.auths.urls")),
+    # Apps
+    path("api/", include("apps.auths.urls")),
     path("notifications/", include("apps.notifications.urls")),
     # posts
     path("", include("apps.posts.urls")),
