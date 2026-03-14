@@ -79,6 +79,25 @@ export const PostDetailPage = () => {
     onError: (err: any) => alert(err?.response?.data?.detail || 'Не удалось обновить'),
   });
 
+  const deletePostMutation = useMutation({
+    mutationFn: () => {
+      if (!token) throw new Error('Не авторизован');
+      return postsApi.delete(id!, token); // Убедитесь, что в postsApi есть метод delete
+    },
+    onSuccess: () => {
+      // Очищаем кэш и уходим на страницу постов
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      navigate('/posts');
+    },
+    onError: (err: any) => alert(err?.response?.data?.detail || 'Не удалось удалить пост'),
+  });
+
+  const handleDelete = () => {
+    if (window.confirm('Вы уверены, что хотите удалить этот пост?')) {
+      deletePostMutation.mutate();
+    }
+  };
+
   const handleLike = () => {
     if (!user || !token || !post) return;
     post.is_liked ? unlikeMutation.mutate() : likeMutation.mutate();
@@ -161,7 +180,12 @@ export const PostDetailPage = () => {
               {!post.can_edit && isAuthor && (
                 <span style={{ color: '#4a6278', fontSize: '12px', alignSelf: 'center' }}>Ред. недоступно</span>
               )}
-              <button className="tg-btn tg-btn-danger"><Trash2 size={14} /> Удалить</button>
+              <button 
+              className="tg-btn tg-btn-danger" 
+              onClick={handleDelete}
+              disabled={deletePostMutation.isPending}>
+                {deletePostMutation.isPending ? ('Удаление...') : 
+                (<><Trash2 size={14} /> Удалить</>)}</button>
             </div>
           )}
         </div>

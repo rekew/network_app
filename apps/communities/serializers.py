@@ -22,7 +22,6 @@ class CommunitySerializer(ModelSerializer):
     membership_status: SerializerMethodField = SerializerMethodField()
     posts_count: SerializerMethodField = SerializerMethodField()
     members_count: SerializerMethodField = SerializerMethodField()
-    slug: SerializerMethodField = SerializerMethodField()
 
     class Meta:
         model = Community
@@ -80,10 +79,14 @@ class CommunitySerializer(ModelSerializer):
 
 
     def get_posts_count(self, obj: Community) -> int:
-        """Get total number of posts"""
-        if hasattr(obj, 'posts_count'):
+        """Получить общее количество постов"""
+        if hasattr(obj, 'posts_count') and not callable(obj.posts_count):
             return obj.posts_count
-        return obj.posts_count()
+        
+        try:
+            return obj.posts.count() 
+        except AttributeError:
+            return 0
 
 
     def get_members_count(self, obj: Community) -> int:
@@ -92,11 +95,6 @@ class CommunitySerializer(ModelSerializer):
             return 1 + (obj.active_members_count or 0)
         active_members = obj.memberships.filter(status='active').count()
         return 1 + active_members
-
-
-    def get_slug(self, obj: Community) -> str:
-       """Get slug """
-       return str(obj.id)
 
 
     def get_owner(self, obj: Community) -> str:

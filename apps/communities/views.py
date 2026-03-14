@@ -3,6 +3,8 @@ from typing import Any, Optional
 
 # Django Modules
 from django.db.models import QuerySet, Count, Q
+from django.utils.text import slugify
+import uuid
 
 # Django Rest Framework
 from rest_framework.viewsets import ViewSet
@@ -29,6 +31,7 @@ from .serializers import (
 class CommunityViewSet(ViewSet):
     """ViewSet for handling community related endpoints"""
 
+    
     def retrieve(
             self,
             request: DRFRequest,
@@ -85,31 +88,37 @@ class CommunityViewSet(ViewSet):
             data=serilizer.data,
             status=HTTP_200_OK
         )
+    
 
-
-    def create(self,
-            request: DRFRequest,
-            *args: tuple[Any, ...],
-            **kwargs: dict[str, Any],
-    ) -> DRFResponse:
+    def create(self, request, *args, **kwargs):
         """Create a new Community"""
-
-        serializer: CommunitySerializer = CommunitySerializer(
-            data=request.data,
+        data = request.data.copy()
+        base_slug = slugify(data.get('name', ''))
+        if not base_slug:
+            base_slug = 'community'
+    
+        slug = base_slug
+        
+        while Community.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{uuid.uuid4().hex[:6]}"
+    
+        data['slug'] = slug
+    
+        serializer = CommunitySerializer(
+            data=data,
             context={'request': request}
         )
-
+        
         if not serializer.is_valid():
             return DRFResponse(
-                data=serializer.errors,
+                data=serializer.errors, 
                 status=HTTP_400_BAD_REQUEST
             )
-
+        
         serializer.save(owner=request.user)
-
         return DRFResponse(
-            data=serializer.data,
-            status=HTTP_201_CREATED,
+            data=serializer.data, 
+            status=HTTP_201_CREATED
         )
 
 

@@ -3,26 +3,26 @@ import type { Community, CommunityMembership, CreateCommunityRequest, PaginatedR
 
 export const communitiesApi = {
   list: (params?: { visibility?: string; search?: string }): Promise<Community[] | PaginatedResponse<Community>> =>
-    apiClient.get('/communities/api/', { params }),
+    apiClient.get('/communities/', { params }),
 
   get: (id: string): Promise<Community> =>
-    apiClient.get(`/communities/api/${id}/`),
+    apiClient.get(`/communities/${id}/`),
 
   create: (data: CreateCommunityRequest): Promise<Community> =>
-    apiClient.post('/communities/api/', data),
+    apiClient.post('/communities/', data),
 
   update: (id: string, data: Partial<CreateCommunityRequest>): Promise<Community> =>
-    apiClient.put(`/communities/api/${id}/`, data),
+    apiClient.put(`/communities/${id}/`, data),
 
   delete: (id: string): Promise<void> =>
-    apiClient.delete(`/communities/api/${id}/`),
+    apiClient.delete(`/communities/${id}/`),
 
   join: (id: string): Promise<CommunityMembership> =>
-    apiClient.post(`/communities/api/${id}/join/`),
+    apiClient.post(`/communities/${id}/join/`),
 
   leave: (id: string): Promise<void> =>
-    apiClient.post(`/communities/api/${id}/leave/`),
+    apiClient.post(`/communities/${id}/leave/`),
 
   getMembers: (id: string): Promise<CommunityMembership[]> =>
-    apiClient.get(`/communities/api/${id}/members/`),
+    apiClient.get(`/communities/${id}/members/`),
 };

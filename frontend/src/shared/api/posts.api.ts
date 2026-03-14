@@ -3,39 +3,41 @@ import type { Post, Comment, CreatePostRequest, PaginatedResponse } from '@/shar
 
 export const postsApi = {
   list: (params?: { community?: string; search?: string }): Promise<Post[] | PaginatedResponse<Post>> =>
-    apiClient.get('/posts/posts/', { params }),
+    apiClient.get('/posts/', { params }),
 
   get: (id: string): Promise<Post> =>
-    apiClient.get(`/posts/posts/${id}/`),
+    apiClient.get(`/posts/${id}/`),
 
   create: (data: CreatePostRequest): Promise<Post> =>
-    apiClient.post('/posts/posts/', data),
+    apiClient.post('/posts/', data),
 
   update: (id: string, data: Partial<CreatePostRequest>): Promise<Post> =>
-    apiClient.put(`/posts/posts/${id}/`, data),
+    apiClient.put(`/posts/${id}/`, data),
 
-  delete: (id: string): Promise<void> =>
-    apiClient.delete(`/posts/posts/${id}/`),
+  delete: (id: string, token: string) => 
+  apiClient.delete(`/posts/${id}/`, {
+    headers: { Authorization: `Bearer ${token}` }
+  }),
 
   getUserPosts: (userId: string): Promise<Post[]> =>
-    apiClient.get(`/posts/posts/?user=${userId}`),
+    apiClient.get(`/posts/?user=${userId}`),
 
   // Comments 
   getComments: async (postId: string): Promise<Comment[]> => {
     try {
-      return await apiClient.get<Comment[]>(`/posts/comments/?post=${postId}`);
+      return await apiClient.get<Comment[]>(`/comments/?post=${postId}`);
     } catch {
       return [];
     }
   },
 
   createComment: async (postId: string, data: { content: string }): Promise<Comment> =>
-    apiClient.post(`/posts/comments/`, { ...data, post: postId }),
+    apiClient.post(`/comments/`, { ...data, post: postId }),
 
   // Likes
   like: async (postId: string): Promise<Post> =>
-    apiClient.post(`/posts/posts/${postId}/like/`, {}),
+    apiClient.post(`/${postId}/like/`, {}),
 
   unlike: async (postId: string): Promise<Post> =>
-    apiClient.delete(`/posts/posts/${postId}/like/`),
+    apiClient.delete(`/${postId}/like/`),
 };

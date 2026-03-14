@@ -11,11 +11,13 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 
-    # Apps
-    path("api/", include("apps.auths.urls")),
+    # users
+    path("", include("apps.auths.urls")),
     path("notifications/", include("apps.notifications.urls")),
-    path("posts/", include("apps.posts.urls")),
-    path('communities/', include('apps.communities.urls')),
+    # posts
+    path("", include("apps.posts.urls")),
+    # communities
+    path('', include('apps.communities.urls')),
 
     # API url docs
     path('api/docs/schema/', SpectacularAPIView.as_view(), name='schema'),

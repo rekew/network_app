@@ -29,7 +29,10 @@ class PostSerializer(ModelSerializer):
         read_only_fields = (
             "id", "author", "created_at", 
             "updated_at", "deleted_at",
-            )
+        )
+        extra_kwargs = {
+            "community": {"required": False, "allow_null": True},
+        }
 
 
 class CommentSerializer(ModelSerializer):
