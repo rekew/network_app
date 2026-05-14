@@ -29,6 +29,7 @@ from apps.posts.serializers import (
     HashtagSerializer, PostHashtag, 
     TagSerializer, PostTag,
 )
+from apps.notifications.services import dispatch_comment_notifications
 
 
 WRITE_ACTION = ("create", "update", "partial_update", "destroy")
@@ -138,7 +139,8 @@ class CommentViewSet(ViewSet):
     def create(self, request):
         serializer = CommentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(author=request.user)
+        comment = serializer.save(author=request.user)
+        dispatch_comment_notifications(comment)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
     @extend_schema(parameters=[ID_PARAM],request=CommentSerializer, responses={200: CommentSerializer})

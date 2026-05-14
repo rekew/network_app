@@ -41,7 +41,14 @@ DJANGO_AND_THIRD_PARTY_APPS = [
 
     'rest_framework',
     'drf_spectacular',
+    'channels',
 ]
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    }
+}
 
 PROJECT_APPS = [
     "apps.auths.apps.AuthsConfig",
