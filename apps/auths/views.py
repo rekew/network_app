@@ -42,6 +42,7 @@ from .serializers import (
     UpdateUserSerializer,
     UserBlockSerializer,
 )
+from apps.notifications.services import dispatch_moderation_report
 
 
 # ---------------------------------------------------
@@ -337,7 +338,8 @@ class ReportViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
 
-        serializer.save(reporter=self.request.user)
+        report = serializer.save(reporter=self.request.user)
+        dispatch_moderation_report(report)
 
     def perform_update(self, serializer):
 
