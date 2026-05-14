@@ -236,6 +236,10 @@ LOGGING = {
         "level": LOG_LEVEL,
     },
 }
+
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
 # CORS Settings
 # -----
 CORS_ALLOWED_ORIGINS = [
