@@ -29,20 +29,33 @@ from apps.posts.serializers import (
     HashtagSerializer, PostHashtag, 
     TagSerializer, PostTag,
 )
+from apps.notifications.services import dispatch_comment_notifications
 
 
 WRITE_ACTION = ("create", "update", "partial_update", "destroy")
+
+ID_PARAM = OpenApiParameter(
+    name="id",
+    type=OpenApiTypes.INT,
+    location=OpenApiParameter.PATH,
+    description="Object ID",
+)
+
 
 def get_permissions_by_action(action):
     if action in WRITE_ACTION:
         return [IsAuthenticated()]
     return [AllowAny()]
 
+
 @extend_schema(tags=["Posts"])
 class PostViewSet(ViewSet):
     """
     ViewSet for Post model
     """
+
+    serializer_class = PostSerializer
+
     def get_permissions(self):
         return get_permissions_by_action(self.action)
     
@@ -52,7 +65,7 @@ class PostViewSet(ViewSet):
         serializer = PostSerializer(queryset, many=True)
         return Response(serializer.data)
     
-    @extend_schema(responses={200: PostSerializer})
+    @extend_schema(parameters=[ID_PARAM],responses={200: PostSerializer})
     def retrieve(self, request, pk=None):
         post = get_object_or_404(Post, pk=pk, deleted_at__isnull=True)
         serializer = PostSerializer(post)
@@ -65,7 +78,7 @@ class PostViewSet(ViewSet):
         serializer.save(author=request.user)
         return Response(serializer.data, status=HTTP_201_CREATED)
     
-    @extend_schema(request=PostSerializer, responses={200: PostSerializer})
+    @extend_schema(parameters=[ID_PARAM],request=PostSerializer, responses={200: PostSerializer})
     def update(self, request, pk=None):
         post = get_object_or_404(Post,pk=pk, deleted_at__isnull=True)
         serializer = PostSerializer(post,data=request.data)
@@ -73,7 +86,7 @@ class PostViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data)
 
-    @extend_schema(request=PostSerializer, responses={200: PostSerializer})
+    @extend_schema(parameters=[ID_PARAM],request=PostSerializer, responses={200: PostSerializer})
     def partial_update(self, request, pk=None):
         post = get_object_or_404(Post, pk=pk, deleted_at__isnull=True)
         serializer = PostSerializer(post, data=request.data, partial=True)
@@ -81,7 +94,7 @@ class PostViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data)
     
-    extend_schema(responses={204: None})
+    @extend_schema(parameters=[ID_PARAM],responses={204: None})
     def destroy(self, request, pk=None):
         post = get_object_or_404(Post, pk=pk, deleted_at__isnull=True)
         post.deleted_at = timezone.now()
@@ -94,6 +107,9 @@ class CommentViewSet(ViewSet):
     """
     ViewSet for comment model
     """
+
+    serializer_class = CommentSerializer
+
     def get_permissions(self):
         return get_permissions_by_action(self.action)
     
@@ -113,7 +129,7 @@ class CommentViewSet(ViewSet):
         serializer = CommentSerializer(queryset, many=True)
         return Response(serializer.data)
     
-    @extend_schema(responses={200: CommentSerializer})
+    @extend_schema(parameters=[ID_PARAM],responses={200: CommentSerializer})
     def retrieve(self, request, pk=None):
         comment = get_object_or_404(Comment, pk=pk, deleted_at__isnull=True)
         serializer = CommentSerializer(comment)
@@ -123,10 +139,11 @@ class CommentViewSet(ViewSet):
     def create(self, request):
         serializer = CommentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(author=request.user)
+        comment = serializer.save(author=request.user)
+        dispatch_comment_notifications(comment)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
-    @extend_schema(request=CommentSerializer, responses={200: CommentSerializer})
+    @extend_schema(parameters=[ID_PARAM],request=CommentSerializer, responses={200: CommentSerializer})
     def update(self, request, pk=None):
         comment = get_object_or_404(Comment, pk=pk)
         serializer = CommentSerializer(comment, data=request.data)
@@ -134,7 +151,7 @@ class CommentViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data)
     
-    @extend_schema(request=CommentSerializer, responses={200: CommentSerializer})
+    @extend_schema(parameters=[ID_PARAM],request=CommentSerializer, responses={200: CommentSerializer})
     def partial_update(self, request, pk=None):
         comment = get_object_or_404(Comment, pk=pk)
         serializer = CommentSerializer(comment, data=request.data, partial=True)
@@ -142,7 +159,7 @@ class CommentViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data)
     
-    @extend_schema(responses={204: None})
+    @extend_schema(parameters=[ID_PARAM],responses={204: None})
     def destroy(self, request, pk=None):
         comment = get_object_or_404(Comment, pk=pk)
         comment.deleted_at = timezone.now()
@@ -155,6 +172,9 @@ class ReactionViewSet(ViewSet):
     """
     ViewSet for Reaction model
     """
+
+    serializer_class = ReactionSerializer
+
     def get_permissions(self):
         return get_permissions_by_action(self.action)
     
@@ -182,7 +202,7 @@ class ReactionViewSet(ViewSet):
         serializer = ReactionSerializer(queryset, many=True)
         return Response(serializer.data)
     
-    @extend_schema(responses={200: ReactionSerializer})
+    @extend_schema(parameters=[ID_PARAM],responses={200: ReactionSerializer})
     def retrieve(self, request, pk=None):
         reaction = get_object_or_404(Reaction, pk=pk)
         serializer = ReactionSerializer(reaction)
@@ -195,7 +215,7 @@ class ReactionViewSet(ViewSet):
         serializer.save(user=request.user)
         return Response(serializer.data, status=HTTP_201_CREATED)
     
-    @extend_schema(request=ReactionSerializer, responses={200: ReactionSerializer})
+    @extend_schema(parameters=[ID_PARAM],request=ReactionSerializer, responses={200: ReactionSerializer})
     def update(self, request, pk=None):
         reaction = get_object_or_404(Reaction, pk=pk)
         serializer = ReactionSerializer(reaction, data=request.data)
@@ -203,7 +223,7 @@ class ReactionViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data)
     
-    @extend_schema(request=ReactionSerializer, responses={200: ReactionSerializer})
+    @extend_schema(parameters=[ID_PARAM],request=ReactionSerializer, responses={200: ReactionSerializer})
     def partial_update(self, request, pk=None):
         reaction = get_object_or_404(Reaction, pk=pk)
         serializer = ReactionSerializer(reaction, data=request.data, partial=True)
@@ -211,7 +231,7 @@ class ReactionViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data)
     
-    @extend_schema(responses={204: None})
+    @extend_schema(parameters=[ID_PARAM],responses={204: None})
     def destroy(self, request, pk=None):
         reaction = get_object_or_404(Reaction, pk=pk)
         reaction.delete()
@@ -223,6 +243,9 @@ class TagViewSet(ViewSet):
     """
     ViewSet for Tag model
     """
+
+    serializer_class = TagSerializer
+
     def get_permissions(self):
         return get_permissions_by_action(self.action)
     
@@ -232,7 +255,7 @@ class TagViewSet(ViewSet):
         serializer = TagSerializer(queryset, many=True)
         return Response(serializer.data)
     
-    @extend_schema(responses={200: TagSerializer})
+    @extend_schema(parameters=[ID_PARAM],responses={200: TagSerializer})
     def retrieve(self, request, pk=None):
         tag = get_object_or_404(Tag, pk=pk)
         serializer = TagSerializer(tag)
@@ -245,7 +268,7 @@ class TagViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data, status=HTTP_201_CREATED)
     
-    @extend_schema(responses={204: None})
+    @extend_schema(parameters=[ID_PARAM],responses={204: None})
     def destroy(self, request, pk=None):
         tag = get_object_or_404(Tag, pk=pk)
         tag.delete()
@@ -257,6 +280,9 @@ class PostTagViewSet(ViewSet):
     """
     ViewSet for PostTag model
     """
+
+    serializer_class = PostTagSerializer
+
     def get_permissions(self):
         return get_permissions_by_action(self.action)
     
@@ -277,7 +303,7 @@ class PostTagViewSet(ViewSet):
         serializer = PostTagSerializer(queryset, many=True)
         return Response(serializer.data)
     
-    @extend_schema(responses={200: PostTagSerializer})
+    @extend_schema(parameters=[ID_PARAM],responses={200: PostTagSerializer})
     def retrieve(self, request, pk=None):
         post_tag = get_object_or_404(PostTag, pk=pk)
         serializer = PostTagSerializer(post_tag)
@@ -290,7 +316,7 @@ class PostTagViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data, status=HTTP_201_CREATED)
     
-    @extend_schema(responses={204: None})
+    @extend_schema(parameters=[ID_PARAM],responses={204: None})
     def destroy(self, request, pk=None):
         post_tag = get_object_or_404(PostTag, pk=pk)
         post_tag.delete()
@@ -302,6 +328,9 @@ class HashtagViewSet(ViewSet):
     """
     ViewSet for Hashtag model
     """
+
+    serializer_class = HashtagSerializer
+
     def get_permissions(self):
         return get_permissions_by_action(self.action)
     
@@ -311,7 +340,7 @@ class HashtagViewSet(ViewSet):
         serializer = HashtagSerializer(queryset, many=True)
         return Response(serializer.data)
     
-    @extend_schema(responses={200: HashtagSerializer})
+    @extend_schema(parameters=[ID_PARAM],responses={200: HashtagSerializer})
     def retrieve(self, request, pk=None):
         hashtag = get_object_or_404(Hashtag, pk=pk)
         serializer = HashtagSerializer(hashtag)
@@ -330,6 +359,9 @@ class PostHashtagViewSet(ViewSet):
     """
     ViewSet for PostHashtag model
     """
+
+    serializer_class = PostHashtagSerializer
+
     def get_permissions(self):
         return get_permissions_by_action(self.action)
     
@@ -350,7 +382,7 @@ class PostHashtagViewSet(ViewSet):
         serializer = PostHashtagSerializer(queryset, many=True)
         return Response(serializer.data)
     
-    @extend_schema(responses={200: PostHashtagSerializer})
+    @extend_schema(parameters=[ID_PARAM],responses={200: PostHashtagSerializer})
     def retrieve(self, request, pk=None):
         post_hashtag = get_object_or_404(PostHashtag, pk=pk)
         serializer = PostHashtagSerializer(post_hashtag)
@@ -363,7 +395,7 @@ class PostHashtagViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data, status=HTTP_201_CREATED)
     
-    @extend_schema(responses={204: None})
+    @extend_schema(parameters=[ID_PARAM],responses={204: None})
     def destroy(self, request, pk=None):
         post_hashtag = get_object_or_404(PostHashtag, pk=pk)
         post_hashtag.delete()
@@ -375,6 +407,9 @@ class PollViewSet(ViewSet):
     """
     ViewSet for Poll model
     """
+
+    serializer_class = PollSerailizer
+    
     def get_permissions(self):
         return get_permissions_by_action(self.action)
     
@@ -384,7 +419,7 @@ class PollViewSet(ViewSet):
         serializer = PollSerailizer(queryset, many=True)
         return Response(serializer.data)
     
-    @extend_schema(responses={200: PollSerailizer})
+    @extend_schema(parameters=[ID_PARAM],responses={200: PollSerailizer})
     def retrieve(self, request, pk=None):
         poll = get_object_or_404(Poll, pk=pk)
         serializer = PollSerailizer(poll)
@@ -397,7 +432,7 @@ class PollViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data, status=HTTP_201_CREATED)
 
-    @extend_schema(request=TagSerializer, responses={200: PollSerailizer()})
+    @extend_schema(parameters=[ID_PARAM],request=TagSerializer, responses={200: PollSerailizer()})
     def update(self, request, pk=None):
         poll = get_object_or_404(Poll, pk=pk)
         serializer = PollSerailizer(poll, data=request.data)
@@ -405,7 +440,7 @@ class PollViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data)
 
-    @extend_schema(request=TagSerializer, responses={200: PollSerailizer})
+    @extend_schema(parameters=[ID_PARAM],request=TagSerializer, responses={200: PollSerailizer})
     def partial_update(self, request, pk=None):
         poll = get_object_or_404(Poll, pk=pk)
         serializer = PollSerailizer(poll, data=request.data, partial=True)
@@ -413,7 +448,7 @@ class PollViewSet(ViewSet):
         serializer.save()
         return Response(serializer.data)
     
-    @extend_schema(responses={204: None})
+    @extend_schema(parameters=[ID_PARAM],responses={204: None})
     def destroy(self, request, pk=None):
         poll = get_object_or_404(Poll, pk=pk)
         poll.delete()
