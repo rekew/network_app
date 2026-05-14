@@ -1,6 +1,4 @@
 # Django Modules
-from enum import unique
-
 from django.db.models import (
     Model, CharField, SlugField,
     TextField, ForeignKey, CASCADE, DateTimeField
@@ -71,6 +69,7 @@ class CommunityMembership(Model):
     community = ForeignKey(
         Community,
         on_delete=CASCADE,
+        related_name='memberships'
     )
 
     role = CharField(
