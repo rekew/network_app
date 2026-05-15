@@ -22,6 +22,7 @@ from django.db.models import (
     SET_NULL,
     TextField,
     UUIDField,
+    TextChoices,
 )
 
 # PROJECT MODULES
@@ -185,14 +186,16 @@ class UserBlock(Model):
 
 class ActivityLog(Abstract):
     """Audit trail for user-related actions."""
-    ACTION_TYPES = [
-        ("login", "Login"),
-        ("logout", "Logout"),
-        ("post_create", "Post Created"),
-        ("post_delete", "Post Deleted"),
-        ("comment_create", "Commet Created"),
-        ("password_change", "Password Changed"),
-    ]
+    
+    class UserActionType(TextChoices):
+        """User actions in the system """
+        LOGIN = 'LOGIN', 'Login'
+        LOGOUT = 'LOGOUT', 'Logout'
+        POST_CREATE = 'POST_CREATE', 'Post Created'
+        POST_DELETE = 'POST_DELETE', 'Post Deleted'
+        COMMENT_CREATE = 'COMMENT_CREATE', 'Comment Created'
+        PASSWORD_CHANGE = 'PASSWORD_CHANGE', 'Password Changed'
+        
     USER_AGENT_MAX_LENGTH = 255
     ACTION_TYPE_MAX_LENGTH = 50
 
@@ -213,7 +216,7 @@ class ActivityLog(Abstract):
 
     action_type = CharField(
         max_length=ACTION_TYPE_MAX_LENGTH,
-        choices=ACTION_TYPES,
+        choices=UserActionType,
     )
 
 
@@ -222,13 +225,14 @@ class Report(Model):
 
     CONTENT_MAX_LENGTH = 50
     STATUS_MAX_LENGTH = 20
-    STATUS_CHOICES = [
-        ("pending", "Pending"),
-        ("reviewed", "Reviewed"),
-        ("rejected", "Rejected"),
-        ("resolved", "Resolved"),
-    ]
-
+    
+    class StatusType(TextChoices):
+        """User actions in the system """
+        PENDING = "pending", "Pending"
+        REVIEWED = "reviewed", "Reviewed"
+        REJECTED = "rejected", "Rejected"
+        RESOLVED = "resolved", "Resolved"
+      
     reporter = ForeignKey(
         CustomUser,
         on_delete=CASCADE,
@@ -245,7 +249,7 @@ class Report(Model):
 
     status = CharField(
         max_length=STATUS_MAX_LENGTH,
-        choices=STATUS_CHOICES,
+        choices=StatusType,
         default="pending"
     )
 
@@ -264,11 +268,13 @@ class Report(Model):
 
 class Friendship(Model):
     """Friendship relation between two users."""
-    STATUS_CHOICES = [
-        ("pending",  "Pending"),
-        ("accepted", "Accepted"),
-        ("rejected", "Rejected"),
-    ]
+    
+    class StatusType(TextChoices):
+        """User actions in the system """
+        PENDING = "pending", "Pending"
+        ACCEPTED = "accepted", "Accepted"
+        REJECTED = "rejected", "Rejected"
+    
     STATUS_MAX_LENGTH = 10
 
     sender = ForeignKey(
@@ -285,7 +291,7 @@ class Friendship(Model):
 
     status = CharField(
         max_length=STATUS_MAX_LENGTH,
-        choices=STATUS_CHOICES,
+        choices=StatusType,
         default="pending"
     )
 

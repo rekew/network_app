@@ -16,6 +16,7 @@ from channels.auth import AuthMiddlewareStack
 
 #Websocket URLS
 from apps.notifications.routing import websocket_urlpatterns
+from apps.posts.websockets.routing import post_websocket_urlpatterns
 
 os.environ.setdefault(
     "DJANGO_SETTINGS_MODULE",
@@ -25,6 +26,8 @@ os.environ.setdefault(
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
-        URLRouter(websocket_urlpatterns)
+        URLRouter(
+            websocket_urlpatterns + post_websocket_urlpatterns
+        )
     )
 })

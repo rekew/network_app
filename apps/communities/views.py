@@ -24,14 +24,35 @@ from rest_framework.response import Response as DRFResponse
 from .models import Community, CommunityMembership
 from .serializers import (
     CommunitySerializer,
-    CommunityMembershipSerilizer
+    CommunityMembershipSerilizer,
+    CommunityNotFoundSerializer,
+    CommunityResponseSerializer,
+    AlreadyMemberSerializer,
+    LeaveSuccessSerializer,
+    OwnerCannotLeaveSerializer, 
+    NotMemberSerializer,
 )
+
+# Swagger modules
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 
 class CommunityViewSet(ViewSet):
     """ViewSet for handling community related endpoints"""
 
-    
+    @extend_schema(
+        summary="Retrieve a single post by ID",
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Successfully returns the requested community",
+                response=CommunitySerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Event with this ID does not exist",
+                response=CommunityNotFoundSerializer,
+            )
+        }
+    )
     def retrieve(
             self,
             request: DRFRequest,
@@ -56,12 +77,26 @@ class CommunityViewSet(ViewSet):
             .select_related('owner')
             .prefetch_related('memberships', 'posts')
             .annotate(
-                active_members_count=Count('memberships', filter=Q(memberships__status='active'), distinct=True),
-                posts_count=Count('posts', filter=Q(posts__deleted_at__isnull=True), distinct=True)
-            )
+                active_members_count=Count(
+                    'memberships', filter=Q(memberships__status='active'), distinct=True),
+                posts_count=Count(
+                    'posts', filter=Q(posts__deleted_at__isnull=True), distinct=True))
         )
 
 
+    @extend_schema(
+        summary="List all communities",
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Returns list of top-level communities",
+                response=CommunitySerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Event with this ID does not exist",
+                response=CommunityNotFoundSerializer,
+            )
+        }
+    )
     def list(
             self,
             request: DRFRequest,
@@ -88,8 +123,25 @@ class CommunityViewSet(ViewSet):
             data=serilizer.data,
             status=HTTP_200_OK
         )
-    
 
+
+    @extend_schema(
+        summary="Create a Community",
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Community successfully created",
+                response=CommunitySerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Event with this ID does not exist",
+                response=CommunityNotFoundSerializer,
+            ),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Invalid data",
+                response=CommunityResponseSerializer,
+            ),
+        }
+    )
     def create(self, request, *args, **kwargs):
         """Create a new Community"""
         data = request.data.copy()
@@ -121,7 +173,24 @@ class CommunityViewSet(ViewSet):
             status=HTTP_201_CREATED
         )
 
-
+    @extend_schema(
+        summary="Partially update a community",
+        request=CommunitySerializer,
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Community successfully updated",
+                response=CommunitySerializer,
+            ),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Invalid data",
+                response=CommunityResponseSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Community with this ID does not exist",
+                response=CommunityNotFoundSerializer,
+            ),
+        }
+    )
     def partial_update(self,
             request: DRFRequest,
             *args: tuple[Any, ...],
@@ -152,7 +221,18 @@ class CommunityViewSet(ViewSet):
             status=HTTP_200_OK
         )
 
-
+    @extend_schema(
+        summary="Delete a community",
+        responses={
+            HTTP_204_NO_CONTENT: OpenApiResponse(
+                description="Community successfully deleted"
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Community with this ID does not exist",
+                response=CommunityNotFoundSerializer,
+            ),
+        }
+    )
     def destroy(self,
             request: DRFRequest,
             *args: tuple[Any, ...],
@@ -171,8 +251,25 @@ class CommunityViewSet(ViewSet):
         return DRFResponse(
             status=HTTP_204_NO_CONTENT,
         )
-
-
+    
+    @extend_schema(
+        summary="Join a community",
+        request=None,
+        responses={
+            HTTP_201_CREATED: OpenApiResponse(
+                description="Successfully joined the community",
+                response=CommunityMembershipSerilizer,
+            ),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="User is already a member or is the owner",
+                response=AlreadyMemberSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Community with this ID does not exist",
+                response=CommunityNotFoundSerializer,
+            ),
+        }
+    )
     @action(
         methods=['POST'],
         detail=True,
@@ -229,7 +326,19 @@ class CommunityViewSet(ViewSet):
             status=HTTP_201_CREATED
         )
 
-
+    @extend_schema(
+        summary="Get all members of a community",
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Returns list of active members",
+                response=CommunityMembershipSerilizer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Community with this ID does not exist",
+                response=CommunityNotFoundSerializer,
+            ),
+        }
+    )
     @action(
         methods=['GET'],
         detail=True,
@@ -276,8 +385,25 @@ class CommunityViewSet(ViewSet):
             data=members_list,
             status=HTTP_200_OK
         )
-
-
+ 
+    @extend_schema(
+        summary="Leave a community",
+        request=None,
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Successfully left the community",
+                response=LeaveSuccessSerializer,
+            ),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Owner cannot leave their own community",
+                response=OwnerCannotLeaveSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Community does not exist or user is not a member",
+                response=NotMemberSerializer,
+            ),
+        }
+    )
     @action(
         methods=['POST'],
         detail=True,

@@ -26,6 +26,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # -----
 DJANGO_AND_THIRD_PARTY_APPS = [
     # UNFOLD
+    "daphne",
     'unfold',
 
     # DJANGO MODULES

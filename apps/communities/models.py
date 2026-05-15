@@ -1,7 +1,8 @@
 # Django Modules
 from django.db.models import (
     Model, CharField, SlugField,
-    TextField, ForeignKey, CASCADE, DateTimeField
+    TextField, ForeignKey, CASCADE, DateTimeField,
+    TextChoices
 )
 
 # Project Modules
@@ -13,11 +14,11 @@ class Community(Abstract):
 
     NAME_MAX_LENGTH = 255
     VISIBILITY_MAX_LENGTH = 10
-    VISIBILITY_CHOICES = [
-        ("public", "Public"),
-        ("private", "Private"),
-        ("secret", "Secret"),
-    ]
+    class VisibilityType(TextChoices):
+        PUBLIC = "public", "Public"
+        PRIVATE = "private", "Private"
+        SECRET = "secret", "Secret"
+    
 
     name = CharField(
         max_length=NAME_MAX_LENGTH,
@@ -33,7 +34,7 @@ class Community(Abstract):
 
     visibility = CharField(
         max_length=VISIBILITY_MAX_LENGTH,
-        choices=VISIBILITY_CHOICES,
+        choices=VisibilityType,
     )
 
     owner = ForeignKey(
@@ -48,19 +49,19 @@ class Community(Abstract):
 
 
 class CommunityMembership(Model):
-    ROLE_CHOICES = [
-        ("member", "Member"),
-        ("moderator", "Moderator"),
-        ("organizer", "Organizer"),
-    ]
-    ROLE_MAX_LENGTH=20
-    STATUS_CHOICES = [
-        ("active", "Active"),
-        ("pending", "Pending"),
-        ("banned", "Banned"),
-    ]
+    class RoleType(TextChoices):
+        MEMBER = "member", "Member"
+        MODERATOR = "moderator", "Moderator"
+        ORANIZER = "organizer", "Organizer"
+    
+    class StatusType(TextChoices):
+        ACTIVE = "active", "Active"
+        PENDING = "pending", "Pending"
+        BANNED = "banned", "Banned"
+    
     STATUS_MAX_LENGTH=20
-
+    ROLE_MAX_LENGTH=20
+    
     user = ForeignKey(
         CustomUser,
         on_delete=CASCADE,
@@ -74,12 +75,12 @@ class CommunityMembership(Model):
 
     role = CharField(
         max_length=ROLE_MAX_LENGTH,
-        choices=ROLE_CHOICES,
+        choices=RoleType,
     )
 
     status = CharField(
         max_length=STATUS_MAX_LENGTH,
-        choices=STATUS_CHOICES,
+        choices=StatusType,
     )
 
     joined_at = DateTimeField(

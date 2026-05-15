@@ -27,9 +27,18 @@ from .serializers import (
     ChatSerializer,
     ChatMemberSerializer,
     MessageSerializer,
+    ChatNotFoundSerializer,
+    ChatResponseSerializer,
+    ChatForbiddenSerializer,
+    ChatAlreadyMemberSerializer,
+    ChatNotMemberSerializer,
 )
 
+# Swagger modules
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
+
+@extend_schema(tags=["Chats"])
 class ChatViewSet(ViewSet):
     """ViewSet for Chats"""
     permission_classes = [IsAuthenticated]
@@ -42,6 +51,19 @@ class ChatViewSet(ViewSet):
             .distinct()
         )
 
+    @extend_schema(
+        summary="List all chats",
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Returns list of top-level chats",
+                response=ChatSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chats with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            )
+        }
+    )
     def list(
         self,
         request: DRFRequest,
@@ -52,6 +74,23 @@ class ChatViewSet(ViewSet):
         serializer = ChatSerializer(queryset, many=True)
         return DRFResponse(data=serializer.data, status=HTTP_200_OK)
 
+    @extend_schema(
+        summary="Create a Chat",
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Chat successfully created",
+                response=ChatSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            ),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Invalid data",
+                response=ChatResponseSerializer,
+            ),
+        }
+    )
     def create(
         self,
         request: DRFRequest,
@@ -115,6 +154,19 @@ class ChatViewSet(ViewSet):
 
         return DRFResponse(ChatSerializer(chat).data, status=HTTP_201_CREATED)
 
+    @extend_schema(
+        summary="Retrieve a single chat by ID",
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Successfully returns the requested chat",
+                response=ChatSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            )
+        }
+    )
     def retrieve(
         self,
         request: DRFRequest,
@@ -131,6 +183,18 @@ class ChatViewSet(ViewSet):
         serializer = ChatSerializer(chat)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
 
+    @extend_schema(
+        summary="Delete a chat",
+        responses={
+            HTTP_204_NO_CONTENT: OpenApiResponse(
+                description="Chat successfully deleted"
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            ),
+        }
+    )
     def destroy(
         self,
         request: DRFRequest,
@@ -158,6 +222,28 @@ class ChatViewSet(ViewSet):
         chat.delete()
         return DRFResponse(status=HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        summary="Add a member to a chat",
+        request=ChatMemberSerializer,
+        responses={
+            HTTP_201_CREATED: OpenApiResponse(
+                description="Member successfully added",
+                response=ChatMemberSerializer,
+            ),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Cannot add to private chat or user already a member",
+                response=ChatAlreadyMemberSerializer,
+            ),
+            HTTP_403_FORBIDDEN: OpenApiResponse(
+                description="Only admins can add members",
+                response=ChatForbiddenSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            ),
+        }
+    )
     @action(
         methods=["POST"],
         detail=True,
@@ -216,7 +302,24 @@ class ChatViewSet(ViewSet):
             return DRFResponse(data=serializer.data, status=HTTP_201_CREATED)
 
         return DRFResponse(serializer.errors, status=HTTP_400_BAD_REQUEST)
-
+    
+    @extend_schema(
+        summary="Remove a member from a chat",
+        request=None,
+        responses={
+            HTTP_204_NO_CONTENT: OpenApiResponse(
+                description="Member successfully removed",
+            ),
+            HTTP_403_FORBIDDEN: OpenApiResponse(
+                description="Only admins can remove members",
+                response=ChatForbiddenSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat or member not found",
+                response=ChatNotMemberSerializer,
+            ),
+        }
+    )
     @action(
         methods=["DELETE"],
         detail=True,
@@ -257,7 +360,20 @@ class ChatViewSet(ViewSet):
 
         member.delete()
         return DRFResponse(status=HTTP_204_NO_CONTENT)
-
+    
+    @extend_schema(
+        summary="Get all members of a chat",
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Returns list of chat members",
+                response=ChatMemberSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            ),
+        }
+    )
     @action(
         methods=["GET"],
         detail=True,
@@ -286,7 +402,29 @@ class ChatViewSet(ViewSet):
         )
         serializer = ChatMemberSerializer(memberships, many=True)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
-
+    
+    @extend_schema(
+        summary="Send a message to a chat",
+        request=MessageSerializer,
+        responses={
+            HTTP_201_CREATED: OpenApiResponse(
+                description="Message successfully sent",
+                response=MessageSerializer,
+            ),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Invalid message data",
+                response=ChatResponseSerializer,
+            ),
+            HTTP_403_FORBIDDEN: OpenApiResponse(
+                description="User is not a member of this chat",
+                response=ChatForbiddenSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            ),
+        }
+    )
     @action(
         methods=["POST"],
         detail=True,

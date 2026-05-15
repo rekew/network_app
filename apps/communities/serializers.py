@@ -7,7 +7,8 @@ from rest_framework.serializers import (
     Serializer,
     SerializerMethodField,
     ReadOnlyField,
-
+    CharField,
+    ListField,
 )
 # Project Modules
 from .models import Community, CommunityMembership
@@ -119,3 +120,66 @@ class CommunityMembershipSerilizer(ModelSerializer):
             'status',
             'joined_at',
         ]
+
+
+class CommunityNotFoundSerializer(Serializer):
+    """
+            Serializer for HTTP 404 Method Not Allowed response.
+    """
+    detail = CharField()
+
+    class Meta:
+        """Customization of the Serializer metadata."""
+        fields = (
+            "detail",
+        )
+
+
+class CommunityResponseSerializer(Serializer):
+
+    """
+        Serializer for comment errors.
+    """
+    owner_username = ListField(
+        child=CharField(),
+        required=False,
+    )
+
+    class Meta:
+        """Customization of the Serializer metadata."""
+
+        fields = (
+            "owner_username",
+        )
+
+
+class AlreadyMemberSerializer(Serializer):
+    """400 — User is already a member of the community"""
+    detail = CharField(default="You are already a member of this community")
+ 
+    class Meta:
+        fields = ("detail",)
+
+
+class LeaveSuccessSerializer(Serializer):
+    """200 — Successfully left the community"""
+    detail = CharField(default="Successfully left the community")
+ 
+    class Meta:
+        fields = ("detail",)
+
+
+class OwnerCannotLeaveSerializer(Serializer):
+    """400 — Owner cannot leave their own community"""
+    detail = CharField(default="Owner cannot leave the community")
+ 
+    class Meta:
+        fields = ("detail",)
+
+
+class NotMemberSerializer(Serializer):
+    """404 — User is not a member of the community"""
+    detail = CharField(default="You are not a member of this community")
+ 
+    class Meta:
+        fields = ("detail",)

@@ -2,7 +2,8 @@
 from django.db.models import (
     Model, CharField, TextField,
     ForeignKey, CASCADE, BooleanField,
-    DateTimeField, OneToOneField, PositiveIntegerField
+    DateTimeField, OneToOneField, PositiveIntegerField,
+    TextChoices,
 )
 
 # Project Modules
@@ -57,14 +58,14 @@ class Comment(Abstract):
 
 
 class Reaction(Model):
-    REACTION_CHOICES = [
-        ("like", "Like"),
-        ("love", "Love"),
-        ("laugh", "Laugh"),
-        ("wow", "Wow"),
-        ("sad", "Sad"),
-        ("angry", "Angry"),
-    ]
+    class ReactionType(TextChoices):
+        LIKE = "like", "Like"
+        LOVE = "love", "Love"
+        LAUGH = "laugh", "Laugh"
+        WOW = "wow", "Wow"
+        SAD = "sad", "Sad"
+        ANGRY = "angry", "Angry"
+
     REACTION_MAX_LENGTH = 10
 
     user = ForeignKey(
@@ -88,7 +89,7 @@ class Reaction(Model):
 
     reaction_type = CharField(
         max_length=REACTION_MAX_LENGTH,
-        choices=REACTION_CHOICES,
+        choices=ReactionType,
     )
 
     created_at = DateTimeField(
