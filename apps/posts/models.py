@@ -120,7 +120,7 @@ class Poll(Model):
 
 class PollOption(Model):
 
-    OPTION_MAX_LENGTH=255
+    OPTION_MAX_LENGTH = 255
 
     poll = ForeignKey(
         Poll,
@@ -163,7 +163,7 @@ class PollVote(Model):
 
 
 class Hashtag(Model):
-    HASHTAG_MAX_LENGTH=255
+    HASHTAG_MAX_LENGTH = 255
 
     name = CharField(
         max_length=HASHTAG_MAX_LENGTH,
@@ -191,7 +191,7 @@ class PostHashtag(Model):
 
 class Tag(Model):
 
-    TAG_MAX_LENGTH=100
+    TAG_MAX_LENGTH = 100
 
     name = CharField(
         max_length=TAG_MAX_LENGTH,
