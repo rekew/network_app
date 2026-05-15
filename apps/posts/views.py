@@ -21,6 +21,12 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
 # Project modules
+from apps.posts.permissions import (
+    IsAuthor,
+    IsReactionOwner,
+    IsPostAuthor,
+    IsAdminOrReadOnly,
+)
 from apps.posts.models import (
     Post, Comment, Reaction,
     Poll, PollOption, PollVote,
@@ -63,7 +69,11 @@ class PostViewSet(ViewSet):
     serializer_class = PostSerializer
 
     def get_permissions(self):
-        return get_permissions_by_action(self.action)
+        if self.action == "create":
+            return [IsAuthenticated()]
+        if self.action in ("update", "partial_update", "destroy"):
+            return [IsAuthenticated(), IsAuthor()]
+        return [AllowAny()]
 
     @extend_schema(responses={HTTP_200_OK: PostSerializer(many=True)})
     def list(
@@ -116,6 +126,7 @@ class PostViewSet(ViewSet):
         post = Post.objects.filter(pk=kwargs['pk'], deleted_at__isnull=True).first()
         if not post:
             return DRFResponse({'detail': 'Post not found'}, status=HTTP_404_NOT_FOUND)
+        self.check_object_permissions(request, post)
 
         serializer: PostSerializer = PostSerializer(post, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -133,6 +144,7 @@ class PostViewSet(ViewSet):
         post = Post.objects.filter(pk=kwargs['pk'], deleted_at__isnull=True).first()
         if not post:
             return DRFResponse({'detail': 'Post not found'}, status=HTTP_404_NOT_FOUND)
+        self.check_object_permissions(request, post)
 
         serializer: PostSerializer = PostSerializer(post, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -150,6 +162,7 @@ class PostViewSet(ViewSet):
         post = Post.objects.filter(pk=kwargs['pk'], deleted_at__isnull=True).first()
         if not post:
             return DRFResponse({'detail': 'Post not found'}, status=HTTP_404_NOT_FOUND)
+        self.check_object_permissions(request, post)
 
         post.deleted_at = timezone.now()
         post.save()
@@ -163,7 +176,11 @@ class CommentViewSet(ViewSet):
     serializer_class = CommentSerializer
 
     def get_permissions(self):
-        return get_permissions_by_action(self.action)
+        if self.action == "create":
+            return [IsAuthenticated()]
+        if self.action in ("update", "partial_update", "destroy"):
+            return [IsAuthenticated(), IsAuthor()]
+        return [AllowAny()]
 
     @extend_schema(
         responses={HTTP_200_OK: CommentSerializer(many=True)},
@@ -228,6 +245,7 @@ class CommentViewSet(ViewSet):
         comment = Comment.objects.filter(pk=kwargs['pk']).first()
         if not comment:
             return DRFResponse({'detail': 'Comment not found'}, status=HTTP_404_NOT_FOUND)
+        self.check_object_permissions(request, comment)
 
         serializer: CommentSerializer = CommentSerializer(comment, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -246,6 +264,7 @@ class CommentViewSet(ViewSet):
         comment = Comment.objects.filter(pk=kwargs['pk']).first()
         if not comment:
             return DRFResponse({'detail': 'Comment not found'}, status=HTTP_404_NOT_FOUND)
+        self.check_object_permissions(request, comment)
 
         serializer: CommentSerializer = CommentSerializer(comment, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -264,6 +283,7 @@ class CommentViewSet(ViewSet):
         comment = Comment.objects.filter(pk=kwargs['pk']).first()
         if not comment:
             return DRFResponse({'detail': 'Comment not found'}, status=HTTP_404_NOT_FOUND)
+        self.check_object_permissions(request, comment)
 
         comment.deleted_at = timezone.now()
         comment.save()
@@ -278,7 +298,11 @@ class ReactionViewSet(ViewSet):
     serializer_class = ReactionSerializer
 
     def get_permissions(self):
-        return get_permissions_by_action(self.action)
+        if self.action == "create":
+            return [IsAuthenticated()]
+        if self.action in ("update", "partial_update", "destroy"):
+            return [IsAuthenticated(), IsReactionOwner()]
+        return [AllowAny()]
 
     @extend_schema(
         responses={HTTP_200_OK: ReactionSerializer(many=True)},
@@ -349,6 +373,7 @@ class ReactionViewSet(ViewSet):
         reaction = Reaction.objects.filter(pk=kwargs['pk']).first()
         if not reaction:
             return DRFResponse({'detail': 'Reaction not found'}, status=HTTP_404_NOT_FOUND)
+        self.check_object_permissions(request, reaction)
 
         serializer: ReactionSerializer = ReactionSerializer(reaction, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -366,6 +391,7 @@ class ReactionViewSet(ViewSet):
         reaction = Reaction.objects.filter(pk=kwargs['pk']).first()
         if not reaction:
             return DRFResponse({'detail': 'Reaction not found'}, status=HTTP_404_NOT_FOUND)
+        self.check_object_permissions(request, reaction)
 
         serializer: ReactionSerializer = ReactionSerializer(reaction, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -383,6 +409,7 @@ class ReactionViewSet(ViewSet):
         reaction = Reaction.objects.filter(pk=kwargs['pk']).first()
         if not reaction:
             return DRFResponse({'detail': 'Reaction not found'}, status=HTTP_404_NOT_FOUND)
+        self.check_object_permissions(request, reaction)
 
         reaction.delete()
         return DRFResponse(status=HTTP_204_NO_CONTENT)
@@ -395,7 +422,7 @@ class TagViewSet(ViewSet):
     serializer_class = TagSerializer
 
     def get_permissions(self):
-        return get_permissions_by_action(self.action)
+        return [IsAdminOrReadOnly()]
 
     @extend_schema(responses={HTTP_200_OK: TagSerializer(many=True)})
     def list(
@@ -536,7 +563,7 @@ class HashtagViewSet(ViewSet):
     serializer_class = HashtagSerializer
 
     def get_permissions(self):
-        return get_permissions_by_action(self.action)
+        return [IsAdminOrReadOnly()]
 
     @extend_schema(responses={HTTP_200_OK: HashtagSerializer(many=True)})
     def list(
@@ -662,7 +689,11 @@ class PollViewSet(ViewSet):
     serializer_class = PollSerailizer
 
     def get_permissions(self):
-        return get_permissions_by_action(self.action)
+        if self.action == "create":
+            return [IsAuthenticated()]
+        if self.action in ("update", "partial_update", "destroy"):
+            return [IsAuthenticated(), IsPostAuthor()]
+        return [AllowAny()]
 
     @extend_schema(responses={HTTP_200_OK: PollSerailizer(many=True)})
     def list(
@@ -712,9 +743,10 @@ class PollViewSet(ViewSet):
             **kwargs: dict[str, Any],
     ) -> DRFResponse:
         """Update poll"""
-        poll = Poll.objects.filter(pk=kwargs['pk']).first()
+        poll = Poll.objects.select_related("post__author").filter(pk=kwargs['pk']).first()
         if not poll:
             return DRFResponse({'detail': 'Poll not found'}, status=HTTP_404_NOT_FOUND)
+        self.check_object_permissions(request, poll)
 
         serializer: PollSerailizer = PollSerailizer(poll, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -729,9 +761,10 @@ class PollViewSet(ViewSet):
             **kwargs: dict[str, Any],
     ) -> DRFResponse:
         """Partially update poll"""
-        poll = Poll.objects.filter(pk=kwargs['pk']).first()
+        poll = Poll.objects.select_related("post__author").filter(pk=kwargs['pk']).first()
         if not poll:
             return DRFResponse({'detail': 'Poll not found'}, status=HTTP_404_NOT_FOUND)
+        self.check_object_permissions(request, poll)
 
         serializer: PollSerailizer = PollSerailizer(poll, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -746,9 +779,10 @@ class PollViewSet(ViewSet):
             **kwargs: dict[str, Any],
     ) -> DRFResponse:
         """Delete poll"""
-        poll = Poll.objects.filter(pk=kwargs['pk']).first()
+        poll = Poll.objects.select_related("post__author").filter(pk=kwargs['pk']).first()
         if not poll:
             return DRFResponse({'detail': 'Poll not found'}, status=HTTP_404_NOT_FOUND)
+        self.check_object_permissions(request, poll)
 
         poll.delete()
         return DRFResponse(status=HTTP_204_NO_CONTENT)
