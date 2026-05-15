@@ -34,7 +34,10 @@ from apps.posts.serializers import (
     HashtagSerializer, PostHashtag,
     TagSerializer, PostTag,
 )
-from apps.notifications.services import dispatch_comment_notifications
+from apps.notifications.services import (
+    dispatch_comment_notifications,
+    dispatch_post_comment_event,
+)
 
 
 WRITE_ACTION = ("create", "update", "partial_update", "destroy")
@@ -210,6 +213,7 @@ class CommentViewSet(ViewSet):
         serializer: CommentSerializer = CommentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         comment = serializer.save(author=request.user)
+        dispatch_post_comment_event(comment, action='created')
         dispatch_comment_notifications(comment)
         return DRFResponse(serializer.data, status=HTTP_201_CREATED)
 
@@ -228,6 +232,7 @@ class CommentViewSet(ViewSet):
         serializer: CommentSerializer = CommentSerializer(comment, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        dispatch_post_comment_event(comment, action='updated')
         return DRFResponse(serializer.data, status=HTTP_200_OK)
 
     @extend_schema(parameters=[ID_PARAM], request=CommentSerializer, responses={HTTP_200_OK: CommentSerializer})
@@ -245,6 +250,7 @@ class CommentViewSet(ViewSet):
         serializer: CommentSerializer = CommentSerializer(comment, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        dispatch_post_comment_event(comment, action='updated')
         return DRFResponse(serializer.data, status=HTTP_200_OK)
 
     @extend_schema(parameters=[ID_PARAM], responses={HTTP_204_NO_CONTENT: None})
@@ -261,6 +267,7 @@ class CommentViewSet(ViewSet):
 
         comment.deleted_at = timezone.now()
         comment.save()
+        dispatch_post_comment_event(comment, action='deleted')
         return DRFResponse(status=HTTP_204_NO_CONTENT)
 
 

@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 
 from apps.notifications.models import Notification
 from apps.posts.models import Comment
+from apps.posts.serializers import CommentSerializer
 from apps.auths.models import Report
 
 
@@ -49,6 +50,43 @@ def _serialize_report(report: Report) -> dict:
         "handled_by": report.handled_by_id,
         "created_at": report.created_at.isoformat() if report.created_at else None,
     }
+
+
+def _serialize_comment(comment: Comment) -> dict:
+    serializer = CommentSerializer(comment)
+    comment_data = serializer.data
+    comment_data["id"] = comment.id
+    return comment_data
+
+
+def dispatch_post_comment_event(comment: Comment, action: str) -> None:
+    _send_group_event(
+        f"post.{comment.post_id}.comments",
+        {
+            "type": "send_comment",
+            "data": {
+                "action": action,
+                "comment": _serialize_comment(comment),
+            },
+        },
+    )
+
+
+def dispatch_post_typing_event(post_id: int, user, status: str) -> None:
+    _send_group_event(
+        f"post.{post_id}.typing",
+        {
+            "type": "send_typing",
+            "data": {
+                "post_id": post_id,
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                },
+                "status": status,
+            },
+        },
+    )
 
 
 def _create_notification(sender, recipient, content: str, content_type: str | None = None) -> Notification:
