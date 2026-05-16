@@ -1,5 +1,10 @@
 # DRF
-from rest_framework.serializers import ModelSerializer, CharField
+from rest_framework.serializers import (
+    ModelSerializer,
+    CharField,
+    Serializer,
+    ListField,
+)
 
 # Project Modules
 from .models import Chat, ChatMember, Message
@@ -52,3 +57,57 @@ class MessageSerializer(ModelSerializer):
             'reply_to',
         ]
         read_only_fields = ['id', 'sent_at']
+
+
+class ChatNotFoundSerializer(Serializer):
+    """
+    Serializer for HTTP 404 Method Not Allowed response.
+    """
+    detail = CharField()
+
+    class Meta:
+        """Customization of the Serializer metadata."""
+        fields = (
+            "detail",
+        )
+
+
+class ChatResponseSerializer(Serializer):
+    """
+    Serializer for comment errors.
+    """
+    type = CharField(
+        required=False,
+    )
+
+    class Meta:
+        """Customization of the Serializer metadata."""
+
+        fields = (
+            "type",
+        )
+
+
+class ChatForbiddenSerializer(Serializer):
+    """403 — Action not allowed"""
+    detail = CharField(default="You do not have permission to perform this action")
+ 
+    class Meta:
+        fields = ("detail",)
+ 
+
+class ChatAlreadyMemberSerializer(Serializer):
+    """400 — User is already a member of the chat"""
+    detail = CharField(default="User is already a member of this chat")
+ 
+    class Meta:
+        fields = ("detail",)
+ 
+ 
+class ChatNotMemberSerializer(Serializer):
+    """404 — User is not a member of the chat"""
+    detail = CharField(default="User is not a member of this chat")
+ 
+    class Meta:
+        fields = ("detail",)
+ 

@@ -1,6 +1,7 @@
 # Django Modules
 from django.db import transaction
 from django.db.models import QuerySet
+from django.utils.translation import gettext_lazy as _
 
 # Django Rest Framework
 from rest_framework.viewsets import ViewSet
@@ -27,9 +28,18 @@ from .serializers import (
     ChatSerializer,
     ChatMemberSerializer,
     MessageSerializer,
+    ChatNotFoundSerializer,
+    ChatResponseSerializer,
+    ChatForbiddenSerializer,
+    ChatAlreadyMemberSerializer,
+    ChatNotMemberSerializer,
 )
 
+# Swagger modules
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
+
+@extend_schema(tags=["Chats"])
 class ChatViewSet(ViewSet):
     """ViewSet for Chats"""
     permission_classes = [IsAuthenticated]
@@ -42,6 +52,19 @@ class ChatViewSet(ViewSet):
             .distinct()
         )
 
+    @extend_schema(
+        summary="List all chats",
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Returns list of top-level chats",
+                response=ChatSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chats with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            )
+        }
+    )
     def list(
         self,
         request: DRFRequest,
@@ -52,6 +75,23 @@ class ChatViewSet(ViewSet):
         serializer = ChatSerializer(queryset, many=True)
         return DRFResponse(data=serializer.data, status=HTTP_200_OK)
 
+    @extend_schema(
+        summary="Create a Chat",
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Chat successfully created",
+                response=ChatSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            ),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Invalid data",
+                response=ChatResponseSerializer,
+            ),
+        }
+    )
     def create(
         self,
         request: DRFRequest,
@@ -64,19 +104,19 @@ class ChatViewSet(ViewSet):
         if chat_type == "private":
             if not opponent_id:
                 return DRFResponse(
-                    {"detail": "opponent_id is required"},
+                    {"detail": _("opponent_id is required")},
                     status=HTTP_400_BAD_REQUEST,
                 )
 
             if str(opponent_id) == str(request.user.id):
                 return DRFResponse(
-                    {"detail": "Cannot start a chat with yourself"},
+                    {"detail": _("Cannot start a chat with yourself")},
                     status=HTTP_400_BAD_REQUEST,
                 )
 
             if not CustomUser.objects.filter(id=opponent_id).exists():
                 return DRFResponse(
-                    {"detail": "User not found"},
+                    {"detail": _("User not found")},
                     status=HTTP_404_NOT_FOUND,
                 )
 
@@ -97,7 +137,8 @@ class ChatViewSet(ViewSet):
 
         with transaction.atomic():
             chat = serializer.save(created_by=request.user)
-            ChatMember.objects.create(chat=chat, user=request.user, role="admin")
+            ChatMember.objects.create(
+                chat=chat, user=request.user, role="admin")
 
             if chat_type == "private":
                 ChatMember.objects.create(
@@ -107,7 +148,8 @@ class ChatViewSet(ViewSet):
             elif chat_type == "group":
                 member_ids = request.data.get("members", [])
                 if member_ids:
-                    unique_ids = set(int(m) for m in member_ids) - {request.user.id}
+                    unique_ids = set(int(m)
+                                     for m in member_ids) - {request.user.id}
                     ChatMember.objects.bulk_create([
                         ChatMember(chat=chat, user_id=m_id, role="member")
                         for m_id in unique_ids
@@ -115,6 +157,19 @@ class ChatViewSet(ViewSet):
 
         return DRFResponse(ChatSerializer(chat).data, status=HTTP_201_CREATED)
 
+    @extend_schema(
+        summary="Retrieve a single chat by ID",
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Successfully returns the requested chat",
+                response=ChatSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            )
+        }
+    )
     def retrieve(
         self,
         request: DRFRequest,
@@ -125,12 +180,24 @@ class ChatViewSet(ViewSet):
             chat = self.get_queryset().get(id=kwargs["pk"])
         except Chat.DoesNotExist:
             return DRFResponse(
-                {"detail": "Chat does not exist"},
+                {"detail": _("Chat does not exist")},
                 status=HTTP_404_NOT_FOUND,
             )
         serializer = ChatSerializer(chat)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
 
+    @extend_schema(
+        summary="Delete a chat",
+        responses={
+            HTTP_204_NO_CONTENT: OpenApiResponse(
+                description="Chat successfully deleted"
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            ),
+        }
+    )
     def destroy(
         self,
         request: DRFRequest,
@@ -142,7 +209,7 @@ class ChatViewSet(ViewSet):
             chat = self.get_queryset().get(id=kwargs["pk"])
         except Chat.DoesNotExist:
             return DRFResponse(
-                {"detail": "Chat does not exist"},
+                {"detail": _("Chat does not exist")},
                 status=HTTP_404_NOT_FOUND,
             )
 
@@ -151,13 +218,35 @@ class ChatViewSet(ViewSet):
         ).first()
         if not membership or membership.role != "admin":
             return DRFResponse(
-                {"detail": "Only admins can delete this chat"},
+                {"detail": _("Only admins can delete this chat")},
                 status=HTTP_403_FORBIDDEN,
             )
 
         chat.delete()
         return DRFResponse(status=HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        summary="Add a member to a chat",
+        request=ChatMemberSerializer,
+        responses={
+            HTTP_201_CREATED: OpenApiResponse(
+                description="Member successfully added",
+                response=ChatMemberSerializer,
+            ),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Cannot add to private chat or user already a member",
+                response=ChatAlreadyMemberSerializer,
+            ),
+            HTTP_403_FORBIDDEN: OpenApiResponse(
+                description="Only admins can add members",
+                response=ChatForbiddenSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            ),
+        }
+    )
     @action(
         methods=["POST"],
         detail=True,
@@ -174,13 +263,13 @@ class ChatViewSet(ViewSet):
             chat = self.get_queryset().get(id=kwargs["pk"])
         except Chat.DoesNotExist:
             return DRFResponse(
-                {"detail": "Chat does not exist"},
+                {"detail": _("Chat does not exist")},
                 status=HTTP_404_NOT_FOUND,
             )
 
         if chat.type == "private":
             return DRFResponse(
-                {"detail": "Cannot add members to a private chat"},
+                {"detail": _("Cannot add members to a private chat")},
                 status=HTTP_400_BAD_REQUEST,
             )
 
@@ -188,25 +277,25 @@ class ChatViewSet(ViewSet):
             membership = ChatMember.objects.get(user=request.user, chat=chat)
             if membership.role != "admin":
                 return DRFResponse(
-                    {"detail": "Only admins can add members to the group"},
+                    {"detail": _("Only admins can add members to the group")},
                     status=HTTP_403_FORBIDDEN,
                 )
         except ChatMember.DoesNotExist:
             return DRFResponse(
-                {"detail": "You are not a member of this chat"},
+                {"detail": _("You are not a member of this chat")},
                 status=HTTP_403_FORBIDDEN,
             )
 
         user_id = request.data.get("user")
         if not user_id:
             return DRFResponse(
-                {"detail": "user field is required"},
+                {"detail": _("user field is required")},
                 status=HTTP_400_BAD_REQUEST,
             )
 
         if ChatMember.objects.filter(user_id=user_id, chat=chat).exists():
             return DRFResponse(
-                {"detail": "User is already a member of this chat"},
+                {"detail": _("User is already a member of this chat")},
                 status=HTTP_400_BAD_REQUEST,
             )
 
@@ -216,7 +305,24 @@ class ChatViewSet(ViewSet):
             return DRFResponse(data=serializer.data, status=HTTP_201_CREATED)
 
         return DRFResponse(serializer.errors, status=HTTP_400_BAD_REQUEST)
-
+    
+    @extend_schema(
+        summary="Remove a member from a chat",
+        request=None,
+        responses={
+            HTTP_204_NO_CONTENT: OpenApiResponse(
+                description="Member successfully removed",
+            ),
+            HTTP_403_FORBIDDEN: OpenApiResponse(
+                description="Only admins can remove members",
+                response=ChatForbiddenSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat or member not found",
+                response=ChatNotMemberSerializer,
+            ),
+        }
+    )
     @action(
         methods=["DELETE"],
         detail=True,
@@ -233,7 +339,7 @@ class ChatViewSet(ViewSet):
             chat = self.get_queryset().get(id=kwargs["pk"])
         except Chat.DoesNotExist:
             return DRFResponse(
-                {"detail": "Chat does not exist"},
+                {"detail": _("Chat does not exist")},
                 status=HTTP_404_NOT_FOUND,
             )
 
@@ -242,7 +348,7 @@ class ChatViewSet(ViewSet):
         ).first()
         if not requester or requester.role != "admin":
             return DRFResponse(
-                {"detail": "Only admins can remove members"},
+                {"detail": _("Only admins can remove members")},
                 status=HTTP_403_FORBIDDEN,
             )
 
@@ -251,13 +357,26 @@ class ChatViewSet(ViewSet):
             member = ChatMember.objects.get(user_id=user_id, chat=chat)
         except ChatMember.DoesNotExist:
             return DRFResponse(
-                {"detail": "User is not a member of this chat"},
+                {"detail": _("User is not a member of this chat")},
                 status=HTTP_404_NOT_FOUND,
             )
 
         member.delete()
         return DRFResponse(status=HTTP_204_NO_CONTENT)
-
+    
+    @extend_schema(
+        summary="Get all members of a chat",
+        responses={
+            HTTP_200_OK: OpenApiResponse(
+                description="Returns list of chat members",
+                response=ChatMemberSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            ),
+        }
+    )
     @action(
         methods=["GET"],
         detail=True,
@@ -275,7 +394,7 @@ class ChatViewSet(ViewSet):
             chat = self.get_queryset().get(id=kwargs["pk"])
         except Chat.DoesNotExist:
             return DRFResponse(
-                {"detail": "Chat does not exist"},
+                {"detail": _("Chat does not exist")},
                 status=HTTP_404_NOT_FOUND,
             )
 
@@ -286,7 +405,29 @@ class ChatViewSet(ViewSet):
         )
         serializer = ChatMemberSerializer(memberships, many=True)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
-
+    
+    @extend_schema(
+        summary="Send a message to a chat",
+        request=MessageSerializer,
+        responses={
+            HTTP_201_CREATED: OpenApiResponse(
+                description="Message successfully sent",
+                response=MessageSerializer,
+            ),
+            HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Invalid message data",
+                response=ChatResponseSerializer,
+            ),
+            HTTP_403_FORBIDDEN: OpenApiResponse(
+                description="User is not a member of this chat",
+                response=ChatForbiddenSerializer,
+            ),
+            HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Chat with this ID does not exist",
+                response=ChatNotFoundSerializer,
+            ),
+        }
+    )
     @action(
         methods=["POST"],
         detail=True,
@@ -304,13 +445,13 @@ class ChatViewSet(ViewSet):
             chat = self.get_queryset().get(id=kwargs["pk"])
         except Chat.DoesNotExist:
             return DRFResponse(
-                {"detail": "Chat does not exist"},
+                {"detail": _("Chat does not exist")},
                 status=HTTP_404_NOT_FOUND,
             )
 
         if not ChatMember.objects.filter(user=request.user, chat=chat).exists():
             return DRFResponse(
-                {"detail": "You are not a member of this chat"},
+                {"detail": _("You are not a member of this chat")},
                 status=HTTP_403_FORBIDDEN,
             )
 

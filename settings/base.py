@@ -1,4 +1,5 @@
 # Python modules
+from django.utils.translation import gettext_lazy as _
 import os
 # Project modules
 from settings.conf import *
@@ -26,6 +27,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # -----
 DJANGO_AND_THIRD_PARTY_APPS = [
     # UNFOLD
+    "daphne",
     'unfold',
 
     # DJANGO MODULES
@@ -69,6 +71,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -80,15 +83,16 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),  # ВАЖНО: добавьте эту строку!
+            os.path.join(BASE_DIR, 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',  # добавьте для отладки
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.i18n',
             ],
         },
     },
@@ -129,14 +133,24 @@ SIMPLE_JWT = {
 }
 
 # ----------------------------------------------------------------
-# Internationalization
+# Internationalization and Localization
 # -----
-LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'en'
+
+LANGUAGES = [
+    ('ru', _('Russian')),
+    ('en', _('English')),
+]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
+
+TIME_ZONE = 'Asia/Almaty'
 
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 # Media files
@@ -244,7 +258,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 # -----
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://localhost:5173",  
+    "http://localhost:5173",
     "http://127.0.0.1:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True

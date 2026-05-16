@@ -2,8 +2,9 @@
 from django.db.models import (
     Model, CharField, ForeignKey,
     CASCADE, TextField, BooleanField,
-    DateTimeField, SET_NULL,
+    DateTimeField, SET_NULL, TextChoices
 )
+from django.utils.translation import gettext_lazy as _
 
 # Project Modules
 from apps.abstracts.models import Abstract
@@ -12,15 +13,15 @@ from apps.auths.models import CustomUser
 
 class Chat(Abstract):
 
-    TYPE_MAX_LENGTH=10
-    CHAT_TYPE = [
-        ("private", "Private"),
-        ("group", "Group"),
-    ]
+    TYPE_MAX_LENGTH = 10
+
+    class ChatType(TextChoices):
+        PRIVATE = "private", _("Private")
+        GROUP = "group", _("Group")
 
     type = CharField(
         max_length=TYPE_MAX_LENGTH,
-        choices = CHAT_TYPE,
+        choices=TextChoices,
     )
     created_by = ForeignKey(
         CustomUser,
@@ -61,11 +62,11 @@ class Message(Model):
 
 class ChatMember(Model):
 
-    ROLE_CHOICES = [
-        ("member", "Member"),
-        ("admin", "Admin"),
-    ]
-    ROLE_MAX_LENGTH=10
+    class RoleType(TextChoices):
+        MEMBER = "member", _("Member")
+        ADMIN = "admin", _("Admin")
+
+    ROLE_MAX_LENGTH = 10
 
     chat = ForeignKey(
         Chat,
@@ -81,11 +82,10 @@ class ChatMember(Model):
 
     role = CharField(
         max_length=ROLE_MAX_LENGTH,
-        choices=ROLE_CHOICES,
+        choices=RoleType,
         default='member'
     )
 
     joined_at = DateTimeField(
         auto_now_add=True
     )
-

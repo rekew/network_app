@@ -2,8 +2,11 @@
 from django.db.models import (
     Model, CharField, TextField,
     ForeignKey, CASCADE, BooleanField,
-    DateTimeField, OneToOneField, PositiveIntegerField
+    DateTimeField, OneToOneField, PositiveIntegerField,
+    TextChoices,
 )
+from django.utils.translation import gettext_lazy as _
+
 
 # Project Modules
 from apps.abstracts.models import Abstract
@@ -57,14 +60,14 @@ class Comment(Abstract):
 
 
 class Reaction(Model):
-    REACTION_CHOICES = [
-        ("like", "Like"),
-        ("love", "Love"),
-        ("laugh", "Laugh"),
-        ("wow", "Wow"),
-        ("sad", "Sad"),
-        ("angry", "Angry"),
-    ]
+    class ReactionType(TextChoices):
+        LIKE = "like", _("Like")
+        LOVE = "love", _("Love")
+        LAUGH = "laugh", _("Laugh")
+        WOW = "wow", _("Wow")
+        SAD = "sad", _("Sad")
+        ANGRY = "angry", _("Angry")
+
     REACTION_MAX_LENGTH = 10
 
     user = ForeignKey(
@@ -88,7 +91,7 @@ class Reaction(Model):
 
     reaction_type = CharField(
         max_length=REACTION_MAX_LENGTH,
-        choices=REACTION_CHOICES,
+        choices=ReactionType,
     )
 
     created_at = DateTimeField(
@@ -119,7 +122,7 @@ class Poll(Model):
 
 class PollOption(Model):
 
-    OPTION_MAX_LENGTH=255
+    OPTION_MAX_LENGTH = 255
 
     poll = ForeignKey(
         Poll,
@@ -129,7 +132,7 @@ class PollOption(Model):
 
     option_text = CharField(
         max_length=OPTION_MAX_LENGTH,
-
+        verbose_name=_("Option Text")
     )
 
     votes_count = PositiveIntegerField(
@@ -162,7 +165,7 @@ class PollVote(Model):
 
 
 class Hashtag(Model):
-    HASHTAG_MAX_LENGTH=255
+    HASHTAG_MAX_LENGTH = 255
 
     name = CharField(
         max_length=HASHTAG_MAX_LENGTH,
@@ -190,7 +193,7 @@ class PostHashtag(Model):
 
 class Tag(Model):
 
-    TAG_MAX_LENGTH=100
+    TAG_MAX_LENGTH = 100
 
     name = CharField(
         max_length=TAG_MAX_LENGTH,

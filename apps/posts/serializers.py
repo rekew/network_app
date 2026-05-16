@@ -1,3 +1,5 @@
+# Django modules
+from django.utils.translation import gettext_lazy as _
 # DRF modules
 from attr import fields
 from rest_framework.serializers import (
@@ -24,10 +26,10 @@ class PostSerializer(ModelSerializer):
         fields = (
             "id", "author", "community",
             "content", "pinned", "created_at",
-            "updated_at", "deleted_at",                
+            "updated_at", "deleted_at",
         )
         read_only_fields = (
-            "id", "author", "created_at", 
+            "id", "author", "created_at",
             "updated_at", "deleted_at",
         )
         extra_kwargs = {
@@ -49,14 +51,14 @@ class CommentSerializer(ModelSerializer):
             "updated_at", "deleted_at",
         )
         read_only_fields = (
-            "id", "author", "created_at", 
+            "id", "author", "created_at",
             "updated_at", "deleted_at",
-            )
+        )
 
     def get_replies(self, obj) -> list[dict]:
         qs = obj.replies.all()
         return CommentSerializer(qs, many=True).data
-    
+
 
 class ReactionSerializer(ModelSerializer):
     """
@@ -73,15 +75,15 @@ class ReactionSerializer(ModelSerializer):
     def validate(self, attrs):
         if not attrs.get("post") and not attrs.get("comment"):
             raise ValidationError(
-                "Reaction must be linked to post or comment"
+                _("Reaction must be linked to post or comment")
             )
         return attrs
-    
+
 
 class PollOptionSerializer(ModelSerializer):
     """
     Serializer for PollOption model
-    """    
+    """
     class Meta:
         model = PollOption
         fields = ("id", "option_text", "votes_count",)
@@ -91,7 +93,7 @@ class PollOptionSerializer(ModelSerializer):
 class PoleVoteSerializer(ModelSerializer):
     """
     Serializer for PollVote model
-    """ 
+    """
     class Meta:
         model = PollVote
         fields = ("id", "option", "user", "voted_at",)
@@ -132,7 +134,7 @@ class PostHashtagSerializer(ModelSerializer):
         fields = ("id", "post", "hashtag",)
         read_only_fields = ("id",)
 
-    
+
 class TagSerializer(ModelSerializer):
     """
     Serializer for Tag model

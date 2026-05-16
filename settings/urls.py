@@ -18,6 +18,8 @@ urlpatterns = [
     path("", include("apps.posts.urls")),
     # communities
     path('', include('apps.communities.urls')),
+    # chats
+    path('', include('apps.chats.urls')),
 
     # API url docs
     path('api/docs/schema/', SpectacularAPIView.as_view(), name='schema'),
