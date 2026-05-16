@@ -1,0 +1,273 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-16 04:45+0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
+#: apps/auths/models.py:49
+msgid "Email field is required"
+msgstr "Поле Email обязательно для заполнения"
+
+#: apps/auths/models.py:51
+msgid "username field is required"
+msgstr "Поле имени пользователя обязательно для заполнения"
+
+#: apps/auths/models.py:117
+msgid "User"
+msgstr "Пользователь"
+
+#: apps/auths/models.py:118
+msgid "Users"
+msgstr "Пользователи"
+
+#: apps/auths/serializers.py:90
+msgid "Invalid credentials"
+msgstr "Неверные учётные данные"
+
+#: apps/auths/views.py:209
+msgid "receiver is required"
+msgstr "Получатель обязателен"
+
+#: apps/auths/views.py:213
+msgid "You cannot send a friend request to yourself"
+msgstr "Вы не можете отправить заявку в друзья самому себе"
+
+#: apps/auths/views.py:220
+msgid "Friend request already exists"
+msgstr "Заявка в друзья уже отправлена"
+
+#: apps/auths/views.py:264
+msgid "blocked_id is required"
+msgstr "Поле blocked_id обязательно"
+
+#: apps/auths/views.py:267
+msgid "You cannot block yourself"
+msgstr "Вы не можете заблокировать самого себя"
+
+#: apps/auths/views.py:273
+msgid "You have already blocked this user"
+msgstr "Вы уже заблокировали этого пользователя"
+
+#: apps/auths/views.py:350
+msgid "Only staff users can update report status."
+msgstr "Только сотрудники могут обновлять статус жалобы."
+
+#: apps/chats/models.py:18 apps/communities/models.py:19
+msgid "Private"
+msgstr "Приватный"
+
+#: apps/chats/models.py:19
+msgid "Group"
+msgstr "Групповой"
+
+#: apps/chats/models.py:66 apps/communities/models.py:53
+msgid "Member"
+msgstr "Участник"
+
+#: apps/chats/models.py:67
+msgid "Admin"
+msgstr "Администратор"
+
+#: apps/chats/views.py:68
+msgid "opponent_id is required"
+msgstr "Поле opponent_id обязательно"
+
+#: apps/chats/views.py:74
+msgid "Cannot start a chat with yourself"
+msgstr "Нельзя начать чат с самим собой"
+
+#: apps/chats/views.py:80
+msgid "User not found"
+msgstr "Пользователь не найден"
+
+#: apps/chats/views.py:131 apps/chats/views.py:148 apps/chats/views.py:180
+#: apps/chats/views.py:239 apps/chats/views.py:281 apps/chats/views.py:310
+msgid "Chat does not exist"
+msgstr "Чат не существует"
+
+#: apps/chats/views.py:157
+msgid "Only admins can delete this chat"
+msgstr "Только администраторы могут удалить этот чат"
+
+#: apps/chats/views.py:186
+msgid "Cannot add members to a private chat"
+msgstr "Нельзя добавлять участников в приватный чат"
+
+#: apps/chats/views.py:194
+msgid "Only admins can add members to the group"
+msgstr "Только администраторы могут добавлять участников в группу"
+
+#: apps/chats/views.py:199 apps/chats/views.py:316
+msgid "You are not a member of this chat"
+msgstr "Вы не являетесь участником этого чата"
+
+#: apps/chats/views.py:206
+msgid "user field is required"
+msgstr "Поле пользователя обязательно"
+
+#: apps/chats/views.py:212
+msgid "User is already a member of this chat"
+msgstr "Пользователь уже является участником этого чата"
+
+#: apps/chats/views.py:248
+msgid "Only admins can remove members"
+msgstr "Только администраторы могут удалять участников"
+
+#: apps/chats/views.py:257
+msgid "User is not a member of this chat"
+msgstr "Пользователь не является участником этого чата"
+
+#: apps/communities/models.py:18
+msgid "Public"
+msgstr "Публичное"
+
+#: apps/communities/models.py:20
+msgid "Secret"
+msgstr "Секретное"
+
+#: apps/communities/models.py:54
+msgid "Moderator"
+msgstr "Модератор"
+
+#: apps/communities/models.py:55
+msgid "Organizer"
+msgstr "Организатор"
+
+#: apps/communities/models.py:59
+msgid "Active"
+msgstr "Активный"
+
+#: apps/communities/models.py:60
+msgid "Pending"
+msgstr "На рассмотрении"
+
+#: apps/communities/models.py:61
+msgid "Banned"
+msgstr "Заблокирован"
+
+#: apps/communities/views.py:45
+msgid "Community not Found"
+msgstr "Сообщество не найдено"
+
+#: apps/communities/views.py:135
+msgid "This community does not exist"
+msgstr "Данное сообщество не существует"
+
+#: apps/communities/views.py:164 apps/communities/views.py:189
+#: apps/communities/views.py:247 apps/communities/views.py:295
+msgid "Community does not exist"
+msgstr "Сообщество не существует"
+
+#: apps/communities/views.py:200
+msgid "You are already a member of this community"
+msgstr "Вы уже являетесь участником этого сообщества"
+
+#: apps/communities/views.py:206
+msgid "You are the owner of this community"
+msgstr "Вы являетесь владельцем этого сообщества"
+
+#: apps/communities/views.py:301
+msgid "Owner can not leave the community"
+msgstr "Владелец не может покинуть сообщество"
+
+#: apps/communities/views.py:312
+msgid "Successfully left the community"
+msgstr "Вы успешно покинули сообщество"
+
+#: apps/communities/views.py:317
+msgid "Community with this member does not exist"
+msgstr "Сообщество с данным участником не существует"
+
+#: apps/notifications/views.py:35
+msgid "user_id (recipient) is required"
+msgstr "Поле user_id (получатель) обязательно"
+
+#: apps/notifications/views.py:38
+msgid "You cannot send a notification to yourself"
+msgstr "Вы не можете отправить уведомление самому себе"
+
+#: apps/posts/models.py:63
+msgid "Like"
+msgstr "Нравится"
+
+#: apps/posts/models.py:64
+msgid "Love"
+msgstr "Обожаю"
+
+#: apps/posts/models.py:65
+msgid "Laugh"
+msgstr "Смешно"
+
+#: apps/posts/models.py:66
+msgid "Wow"
+msgstr "Вау"
+
+#: apps/posts/models.py:67
+msgid "Sad"
+msgstr "Грустно"
+
+#: apps/posts/models.py:68
+msgid "Angry"
+msgstr "Злюсь"
+
+#: apps/posts/models.py:134
+msgid "Option Text"
+msgstr "Текст варианта"
+
+#: apps/posts/serializers.py:78
+msgid "Reaction must be linked to post or comment"
+msgstr "Реакция должна быть привязана к посту или комментарию"
+
+#: apps/posts/views.py:126 apps/posts/views.py:173 apps/posts/views.py:203
+#: apps/posts/views.py:231
+msgid "Post not found"
+msgstr "Пост не найден"
+
+#: apps/posts/views.py:297 apps/posts/views.py:346 apps/posts/views.py:377
+#: apps/posts/views.py:406
+msgid "Comment not found"
+msgstr "Комментарий не найден"
+
+#: apps/posts/views.py:479 apps/posts/views.py:525 apps/posts/views.py:554
+#: apps/posts/views.py:581
+msgid "Reaction not found"
+msgstr "Реакция не найдена"
+
+#: apps/posts/views.py:629 apps/posts/views.py:674
+msgid "Tag not found"
+msgstr "Тег не найден"
+
+#: apps/posts/views.py:733 apps/posts/views.py:778
+msgid "PostTag not found"
+msgstr "Связь поста с тегом не найдена"
+
+#: apps/posts/views.py:825
+msgid "Hashtag not found"
+msgstr "Хэштег не найден"
+
+#: apps/posts/views.py:906 apps/posts/views.py:951
+msgid "PostHashtag not found"
+msgstr "Связь поста с хэштегом не найдена"
+
+#: settings/base.py:141
+msgid "Russian"
+msgstr "Русский"
+
+#: settings/base.py:142
+msgid "English"
+msgstr "Английский"

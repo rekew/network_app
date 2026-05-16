@@ -24,6 +24,7 @@ from django.db.models import (
     UUIDField,
     TextChoices,
 )
+from django.utils.translation import gettext_lazy as _
 
 # PROJECT MODULES
 from apps.abstracts.models import Abstract
@@ -46,9 +47,9 @@ class CustomUserManager(BaseUserManager):
             ValidationError: If required fields are missing.
         """
         if not email:
-            raise ValidationError(message="Email field is required")
+            raise ValidationError(message=_("Email field is required"))
         if not username:
-            raise ValidationError(message="username field is required")
+            raise ValidationError(message=_("username field is required"))
         new_user: "CustomUser" = self.model(
             email=self.normalize_email(email),
             username=username,
@@ -114,8 +115,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin, Abstract):
 
     class Meta:
         # db_table = "users"
-        verbose_name = "User"
-        verbose_name_plural = "Users"
+        verbose_name = _("User")
+        verbose_name_plural = _("Users")
 
     def __str__(self) -> str:
         return f"{self.email}"

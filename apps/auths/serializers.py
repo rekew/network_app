@@ -1,6 +1,8 @@
 # DJANGO MODULES
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
+from django.utils.translation import gettext_lazy as _
+
 
 # THIRD PARTY AND PYTHON MODULES
 from rest_framework.serializers import ModelSerializer, ValidationError
@@ -85,7 +87,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             password=attrs["password"],
         )
         if user is None:
-            raise ValidationError("Invalid credentials")
+            raise ValidationError(_("Invalid credentials"))
 
         update_last_login(None, user)
         refresh = self.get_token(user)

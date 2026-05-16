@@ -4,6 +4,7 @@ from django.db.models import (
     TextField, ForeignKey, CASCADE, DateTimeField,
     TextChoices
 )
+from django.utils.translation import gettext_lazy as _
 
 # Project Modules
 from apps.abstracts.models import Abstract
@@ -14,11 +15,11 @@ class Community(Abstract):
 
     NAME_MAX_LENGTH = 255
     VISIBILITY_MAX_LENGTH = 10
+
     class VisibilityType(TextChoices):
-        PUBLIC = "public", "Public"
-        PRIVATE = "private", "Private"
-        SECRET = "secret", "Secret"
-    
+        PUBLIC = "public", _("Public")
+        PRIVATE = "private", _("Private")
+        SECRET = "secret", _("Secret")
 
     name = CharField(
         max_length=NAME_MAX_LENGTH,
@@ -50,18 +51,18 @@ class Community(Abstract):
 
 class CommunityMembership(Model):
     class RoleType(TextChoices):
-        MEMBER = "member", "Member"
-        MODERATOR = "moderator", "Moderator"
-        ORANIZER = "organizer", "Organizer"
-    
+        MEMBER = "member", _("Member")
+        MODERATOR = "moderator", _("Moderator")
+        ORANIZER = "organizer", _("Organizer")
+
     class StatusType(TextChoices):
-        ACTIVE = "active", "Active"
-        PENDING = "pending", "Pending"
-        BANNED = "banned", "Banned"
-    
-    STATUS_MAX_LENGTH=20
-    ROLE_MAX_LENGTH=20
-    
+        ACTIVE = "active", _("Active")
+        PENDING = "pending", _("Pending")
+        BANNED = "banned", _("Banned")
+
+    STATUS_MAX_LENGTH = 20
+    ROLE_MAX_LENGTH = 20
+
     user = ForeignKey(
         CustomUser,
         on_delete=CASCADE,

@@ -1,6 +1,7 @@
 # Django Modules
 from django.db import transaction
 from django.db.models import QuerySet
+from django.utils.translation import gettext_lazy as _
 
 # Django Rest Framework
 from rest_framework.viewsets import ViewSet
@@ -103,19 +104,19 @@ class ChatViewSet(ViewSet):
         if chat_type == "private":
             if not opponent_id:
                 return DRFResponse(
-                    {"detail": "opponent_id is required"},
+                    {"detail": _("opponent_id is required")},
                     status=HTTP_400_BAD_REQUEST,
                 )
 
             if str(opponent_id) == str(request.user.id):
                 return DRFResponse(
-                    {"detail": "Cannot start a chat with yourself"},
+                    {"detail": _("Cannot start a chat with yourself")},
                     status=HTTP_400_BAD_REQUEST,
                 )
 
             if not CustomUser.objects.filter(id=opponent_id).exists():
                 return DRFResponse(
-                    {"detail": "User not found"},
+                    {"detail": _("User not found")},
                     status=HTTP_404_NOT_FOUND,
                 )
 
@@ -136,7 +137,8 @@ class ChatViewSet(ViewSet):
 
         with transaction.atomic():
             chat = serializer.save(created_by=request.user)
-            ChatMember.objects.create(chat=chat, user=request.user, role="admin")
+            ChatMember.objects.create(
+                chat=chat, user=request.user, role="admin")
 
             if chat_type == "private":
                 ChatMember.objects.create(
@@ -146,7 +148,8 @@ class ChatViewSet(ViewSet):
             elif chat_type == "group":
                 member_ids = request.data.get("members", [])
                 if member_ids:
-                    unique_ids = set(int(m) for m in member_ids) - {request.user.id}
+                    unique_ids = set(int(m)
+                                     for m in member_ids) - {request.user.id}
                     ChatMember.objects.bulk_create([
                         ChatMember(chat=chat, user_id=m_id, role="member")
                         for m_id in unique_ids
@@ -177,7 +180,7 @@ class ChatViewSet(ViewSet):
             chat = self.get_queryset().get(id=kwargs["pk"])
         except Chat.DoesNotExist:
             return DRFResponse(
-                {"detail": "Chat does not exist"},
+                {"detail": _("Chat does not exist")},
                 status=HTTP_404_NOT_FOUND,
             )
         serializer = ChatSerializer(chat)
@@ -206,7 +209,7 @@ class ChatViewSet(ViewSet):
             chat = self.get_queryset().get(id=kwargs["pk"])
         except Chat.DoesNotExist:
             return DRFResponse(
-                {"detail": "Chat does not exist"},
+                {"detail": _("Chat does not exist")},
                 status=HTTP_404_NOT_FOUND,
             )
 
@@ -215,7 +218,7 @@ class ChatViewSet(ViewSet):
         ).first()
         if not membership or membership.role != "admin":
             return DRFResponse(
-                {"detail": "Only admins can delete this chat"},
+                {"detail": _("Only admins can delete this chat")},
                 status=HTTP_403_FORBIDDEN,
             )
 
@@ -260,13 +263,13 @@ class ChatViewSet(ViewSet):
             chat = self.get_queryset().get(id=kwargs["pk"])
         except Chat.DoesNotExist:
             return DRFResponse(
-                {"detail": "Chat does not exist"},
+                {"detail": _("Chat does not exist")},
                 status=HTTP_404_NOT_FOUND,
             )
 
         if chat.type == "private":
             return DRFResponse(
-                {"detail": "Cannot add members to a private chat"},
+                {"detail": _("Cannot add members to a private chat")},
                 status=HTTP_400_BAD_REQUEST,
             )
 
@@ -274,25 +277,25 @@ class ChatViewSet(ViewSet):
             membership = ChatMember.objects.get(user=request.user, chat=chat)
             if membership.role != "admin":
                 return DRFResponse(
-                    {"detail": "Only admins can add members to the group"},
+                    {"detail": _("Only admins can add members to the group")},
                     status=HTTP_403_FORBIDDEN,
                 )
         except ChatMember.DoesNotExist:
             return DRFResponse(
-                {"detail": "You are not a member of this chat"},
+                {"detail": _("You are not a member of this chat")},
                 status=HTTP_403_FORBIDDEN,
             )
 
         user_id = request.data.get("user")
         if not user_id:
             return DRFResponse(
-                {"detail": "user field is required"},
+                {"detail": _("user field is required")},
                 status=HTTP_400_BAD_REQUEST,
             )
 
         if ChatMember.objects.filter(user_id=user_id, chat=chat).exists():
             return DRFResponse(
-                {"detail": "User is already a member of this chat"},
+                {"detail": _("User is already a member of this chat")},
                 status=HTTP_400_BAD_REQUEST,
             )
 
@@ -336,7 +339,7 @@ class ChatViewSet(ViewSet):
             chat = self.get_queryset().get(id=kwargs["pk"])
         except Chat.DoesNotExist:
             return DRFResponse(
-                {"detail": "Chat does not exist"},
+                {"detail": _("Chat does not exist")},
                 status=HTTP_404_NOT_FOUND,
             )
 
@@ -345,7 +348,7 @@ class ChatViewSet(ViewSet):
         ).first()
         if not requester or requester.role != "admin":
             return DRFResponse(
-                {"detail": "Only admins can remove members"},
+                {"detail": _("Only admins can remove members")},
                 status=HTTP_403_FORBIDDEN,
             )
 
@@ -354,7 +357,7 @@ class ChatViewSet(ViewSet):
             member = ChatMember.objects.get(user_id=user_id, chat=chat)
         except ChatMember.DoesNotExist:
             return DRFResponse(
-                {"detail": "User is not a member of this chat"},
+                {"detail": _("User is not a member of this chat")},
                 status=HTTP_404_NOT_FOUND,
             )
 
@@ -391,7 +394,7 @@ class ChatViewSet(ViewSet):
             chat = self.get_queryset().get(id=kwargs["pk"])
         except Chat.DoesNotExist:
             return DRFResponse(
-                {"detail": "Chat does not exist"},
+                {"detail": _("Chat does not exist")},
                 status=HTTP_404_NOT_FOUND,
             )
 
@@ -442,13 +445,13 @@ class ChatViewSet(ViewSet):
             chat = self.get_queryset().get(id=kwargs["pk"])
         except Chat.DoesNotExist:
             return DRFResponse(
-                {"detail": "Chat does not exist"},
+                {"detail": _("Chat does not exist")},
                 status=HTTP_404_NOT_FOUND,
             )
 
         if not ChatMember.objects.filter(user=request.user, chat=chat).exists():
             return DRFResponse(
-                {"detail": "You are not a member of this chat"},
+                {"detail": _("You are not a member of this chat")},
                 status=HTTP_403_FORBIDDEN,
             )
 

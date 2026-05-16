@@ -1,3 +1,5 @@
+# Django modules
+from django.utils.translation import gettext_lazy as _
 # DRF modules
 from attr import fields
 from rest_framework.serializers import (
@@ -73,7 +75,7 @@ class ReactionSerializer(ModelSerializer):
     def validate(self, attrs):
         if not attrs.get("post") and not attrs.get("comment"):
             raise ValidationError(
-                "Reaction must be linked to post or comment"
+                _("Reaction must be linked to post or comment")
             )
         return attrs
 

@@ -1,5 +1,7 @@
 # DJANGO MODULES
 from django.db.models import QuerySet
+from django.utils.translation import gettext_lazy as _
+
 
 # THIRD PARTY AND PYTHON MODULES
 from rest_framework.exceptions import ValidationError
@@ -30,9 +32,10 @@ class NotificationCreateView(CreateAPIView):
         request: Request = self.request
         recipient_id: Any = request.data.get("user_id")
         if recipient_id is None:
-            raise ValidationError("user_id (recipient) is required")
+            raise ValidationError(_("user_id (recipient) is required"))
         if str(recipient_id) == str(request.user.id):
-            raise ValidationError("You cannot send a notification to yourself")
+            raise ValidationError(
+                _("You cannot send a notification to yourself"))
 
         serializer.save(sender=request.user, user_id=recipient_id)
 

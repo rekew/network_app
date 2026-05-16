@@ -5,6 +5,8 @@ from django.db.models import (
     DateTimeField, OneToOneField, PositiveIntegerField,
     TextChoices,
 )
+from django.utils.translation import gettext_lazy as _
+
 
 # Project Modules
 from apps.abstracts.models import Abstract
@@ -59,12 +61,12 @@ class Comment(Abstract):
 
 class Reaction(Model):
     class ReactionType(TextChoices):
-        LIKE = "like", "Like"
-        LOVE = "love", "Love"
-        LAUGH = "laugh", "Laugh"
-        WOW = "wow", "Wow"
-        SAD = "sad", "Sad"
-        ANGRY = "angry", "Angry"
+        LIKE = "like", _("Like")
+        LOVE = "love", _("Love")
+        LAUGH = "laugh", _("Laugh")
+        WOW = "wow", _("Wow")
+        SAD = "sad", _("Sad")
+        ANGRY = "angry", _("Angry")
 
     REACTION_MAX_LENGTH = 10
 
@@ -130,7 +132,7 @@ class PollOption(Model):
 
     option_text = CharField(
         max_length=OPTION_MAX_LENGTH,
-
+        verbose_name=_("Option Text")
     )
 
     votes_count = PositiveIntegerField(

@@ -2,6 +2,8 @@
 from django.db import models
 from django.db.models import QuerySet
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
 
 # THIRD PARTY
 from rest_framework import status
@@ -204,18 +206,18 @@ class FriendshipViewSet(ModelViewSet):
         receiver_id = self.request.data.get("receiver")
 
         if receiver_id is None:
-            raise ValidationError("receiver is required")
+            raise ValidationError(_("receiver is required"))
 
         if receiver_id == self.request.user.id:
             raise ValidationError(
-                "You cannot send a friend request to yourself"
+                _("You cannot send a friend request to yourself")
             )
 
         if Friendship.objects.filter(
             models.Q(sender=self.request.user, receiver_id=receiver_id)
             | models.Q(sender_id=receiver_id, receiver=self.request.user),
         ).exists():
-            raise ValidationError("Friend request already exists")
+            raise ValidationError(_("Friend request already exists"))
 
         serializer.save(
             sender=self.request.user,
@@ -259,16 +261,16 @@ class UserBlockViewSet(ModelViewSet):
         blocked_id = self.request.data.get("blocked_id")
 
         if blocked_id is None:
-            raise ValidationError("blocked_id is required")
+            raise ValidationError(_("blocked_id is required"))
 
         if blocked_id == self.request.user.id:
-            raise ValidationError("You cannot block yourself")
+            raise ValidationError(_("You cannot block yourself"))
 
         if UserBlock.objects.filter(
             blocker=self.request.user,
             blocked_id=blocked_id,
         ).exists():
-            raise ValidationError("You have already blocked this user")
+            raise ValidationError(_("You have already blocked this user"))
 
         serializer.save(
             blocker=self.request.user,
@@ -314,7 +316,7 @@ class ActivityLogViewSet(ModelViewSet):
 
 class ReportViewSet(ModelViewSet):
     """
-    ViewSet to report 
+    ViewSet to report
 
     methods: GET, POST, UPDATE
     """
@@ -345,7 +347,7 @@ class ReportViewSet(ModelViewSet):
 
         if not self.request.user.is_staff:
             raise ValidationError(
-                "Only staff users can update report status."
+                _("Only staff users can update report status.")
             )
 
         serializer.save(

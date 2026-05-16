@@ -3,6 +3,7 @@ from typing import Any
 
 # Django Modules
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 # Django Rest Framework
 from rest_framework.viewsets import ViewSet
@@ -122,7 +123,7 @@ class PostViewSet(ViewSet):
         post = Post.objects.filter(
             pk=kwargs['pk'], deleted_at__isnull=True).first()
         if not post:
-            return DRFResponse({'detail': 'Post not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Post not found")}, status=HTTP_404_NOT_FOUND)
 
         serializer: PostSerializer = PostSerializer(post)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
@@ -169,7 +170,7 @@ class PostViewSet(ViewSet):
         post = Post.objects.filter(
             pk=kwargs['pk'], deleted_at__isnull=True).first()
         if not post:
-            return DRFResponse({'detail': 'Post not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Post not found")}, status=HTTP_404_NOT_FOUND)
         self.check_object_permissions(request, post)
 
         serializer: PostSerializer = PostSerializer(post, data=request.data)
@@ -199,7 +200,7 @@ class PostViewSet(ViewSet):
         post = Post.objects.filter(
             pk=kwargs['pk'], deleted_at__isnull=True).first()
         if not post:
-            return DRFResponse({'detail': 'Post not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Post not found")}, status=HTTP_404_NOT_FOUND)
         self.check_object_permissions(request, post)
 
         serializer: PostSerializer = PostSerializer(
@@ -227,7 +228,7 @@ class PostViewSet(ViewSet):
         post = Post.objects.filter(
             pk=kwargs['pk'], deleted_at__isnull=True).first()
         if not post:
-            return DRFResponse({'detail': 'Post not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Post not found")}, status=HTTP_404_NOT_FOUND)
         self.check_object_permissions(request, post)
 
         post.deleted_at = timezone.now()
@@ -293,7 +294,7 @@ class CommentViewSet(ViewSet):
         comment = Comment.objects.filter(
             pk=kwargs['pk'], deleted_at__isnull=True).first()
         if not comment:
-            return DRFResponse({'detail': 'Comment not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Comment not found")}, status=HTTP_404_NOT_FOUND)
 
         serializer: CommentSerializer = CommentSerializer(comment)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
@@ -342,7 +343,7 @@ class CommentViewSet(ViewSet):
         """Update comment"""
         comment = Comment.objects.filter(pk=kwargs['pk']).first()
         if not comment:
-            return DRFResponse({'detail': 'Comment not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Comment not found")}, status=HTTP_404_NOT_FOUND)
         self.check_object_permissions(request, comment)
 
         serializer: CommentSerializer = CommentSerializer(
@@ -373,7 +374,7 @@ class CommentViewSet(ViewSet):
         """Partially update comment"""
         comment = Comment.objects.filter(pk=kwargs['pk']).first()
         if not comment:
-            return DRFResponse({'detail': 'Comment not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Comment not found")}, status=HTTP_404_NOT_FOUND)
         self.check_object_permissions(request, comment)
 
         serializer: CommentSerializer = CommentSerializer(
@@ -402,7 +403,7 @@ class CommentViewSet(ViewSet):
         """Soft delete comment"""
         comment = Comment.objects.filter(pk=kwargs['pk']).first()
         if not comment:
-            return DRFResponse({'detail': 'Comment not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Comment not found")}, status=HTTP_404_NOT_FOUND)
         self.check_object_permissions(request, comment)
 
         comment.deleted_at = timezone.now()
@@ -475,7 +476,7 @@ class ReactionViewSet(ViewSet):
         """Get reaction by id"""
         reaction = Reaction.objects.filter(pk=kwargs['pk']).first()
         if not reaction:
-            return DRFResponse({'detail': 'Reaction not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Reaction not found")}, status=HTTP_404_NOT_FOUND)
 
         serializer: ReactionSerializer = ReactionSerializer(reaction)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
@@ -521,7 +522,7 @@ class ReactionViewSet(ViewSet):
         """Update reaction"""
         reaction = Reaction.objects.filter(pk=kwargs['pk']).first()
         if not reaction:
-            return DRFResponse({'detail': 'Reaction not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Reaction not found")}, status=HTTP_404_NOT_FOUND)
         self.check_object_permissions(request, reaction)
 
         serializer: ReactionSerializer = ReactionSerializer(
@@ -550,7 +551,7 @@ class ReactionViewSet(ViewSet):
         """Partially update reaction"""
         reaction = Reaction.objects.filter(pk=kwargs['pk']).first()
         if not reaction:
-            return DRFResponse({'detail': 'Reaction not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Reaction not found")}, status=HTTP_404_NOT_FOUND)
         self.check_object_permissions(request, reaction)
 
         serializer: ReactionSerializer = ReactionSerializer(
@@ -577,7 +578,7 @@ class ReactionViewSet(ViewSet):
         """Delete reaction"""
         reaction = Reaction.objects.filter(pk=kwargs['pk']).first()
         if not reaction:
-            return DRFResponse({'detail': 'Reaction not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Reaction not found")}, status=HTTP_404_NOT_FOUND)
         self.check_object_permissions(request, reaction)
 
         reaction.delete()
@@ -625,7 +626,7 @@ class TagViewSet(ViewSet):
         """Get tag by id"""
         tag = Tag.objects.filter(pk=kwargs['pk']).first()
         if not tag:
-            return DRFResponse({'detail': 'Tag not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Tag not found")}, status=HTTP_404_NOT_FOUND)
 
         serializer: TagSerializer = TagSerializer(tag)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
@@ -670,7 +671,7 @@ class TagViewSet(ViewSet):
         """Delete tag"""
         tag = Tag.objects.filter(pk=kwargs['pk']).first()
         if not tag:
-            return DRFResponse({'detail': 'Tag not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Tag not found")}, status=HTTP_404_NOT_FOUND)
 
         tag.delete()
         return DRFResponse(status=HTTP_204_NO_CONTENT)
@@ -729,7 +730,7 @@ class PostTagViewSet(ViewSet):
         """Get post tag by id"""
         post_tag = PostTag.objects.filter(pk=kwargs['pk']).first()
         if not post_tag:
-            return DRFResponse({'detail': 'PostTag not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("PostTag not found")}, status=HTTP_404_NOT_FOUND)
 
         serializer: PostTagSerializer = PostTagSerializer(post_tag)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
@@ -774,7 +775,7 @@ class PostTagViewSet(ViewSet):
         """Delete post tag"""
         post_tag = PostTag.objects.filter(pk=kwargs['pk']).first()
         if not post_tag:
-            return DRFResponse({'detail': 'PostTag not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("PostTag not found")}, status=HTTP_404_NOT_FOUND)
 
         post_tag.delete()
         return DRFResponse(status=HTTP_204_NO_CONTENT)
@@ -821,7 +822,7 @@ class HashtagViewSet(ViewSet):
         """Get hashtag by id"""
         hashtag = Hashtag.objects.filter(pk=kwargs['pk']).first()
         if not hashtag:
-            return DRFResponse({'detail': 'Hashtag not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Hashtag not found")}, status=HTTP_404_NOT_FOUND)
 
         serializer: HashtagSerializer = HashtagSerializer(hashtag)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
@@ -902,7 +903,7 @@ class PostHashtagViewSet(ViewSet):
         """Get post hashtag by id"""
         post_hashtag = PostHashtag.objects.filter(pk=kwargs['pk']).first()
         if not post_hashtag:
-            return DRFResponse({'detail': 'PostHashtag not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("PostHashtag not found")}, status=HTTP_404_NOT_FOUND)
 
         serializer: PostHashtagSerializer = PostHashtagSerializer(post_hashtag)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
@@ -947,7 +948,7 @@ class PostHashtagViewSet(ViewSet):
         """Delete post hashtag"""
         post_hashtag = PostHashtag.objects.filter(pk=kwargs['pk']).first()
         if not post_hashtag:
-            return DRFResponse({'detail': 'PostHashtag not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("PostHashtag not found")}, status=HTTP_404_NOT_FOUND)
 
         post_hashtag.delete()
         return DRFResponse(status=HTTP_204_NO_CONTENT)
@@ -999,7 +1000,7 @@ class PollViewSet(ViewSet):
         """Get poll by id"""
         poll = Poll.objects.filter(pk=kwargs['pk']).first()
         if not poll:
-            return DRFResponse({'detail': 'Poll not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Poll not found")}, status=HTTP_404_NOT_FOUND)
 
         serializer: PollSerailizer = PollSerailizer(poll)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
@@ -1043,9 +1044,10 @@ class PollViewSet(ViewSet):
             **kwargs: dict[str, Any],
     ) -> DRFResponse:
         """Update poll"""
-        poll = Poll.objects.select_related("post__author").filter(pk=kwargs['pk']).first()
+        poll = Poll.objects.select_related(
+            "post__author").filter(pk=kwargs['pk']).first()
         if not poll:
-            return DRFResponse({'detail': 'Poll not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Poll not found")}, status=HTTP_404_NOT_FOUND)
         self.check_object_permissions(request, poll)
 
         serializer: PollSerailizer = PollSerailizer(poll, data=request.data)
@@ -1071,9 +1073,10 @@ class PollViewSet(ViewSet):
             **kwargs: dict[str, Any],
     ) -> DRFResponse:
         """Partially update poll"""
-        poll = Poll.objects.select_related("post__author").filter(pk=kwargs['pk']).first()
+        poll = Poll.objects.select_related(
+            "post__author").filter(pk=kwargs['pk']).first()
         if not poll:
-            return DRFResponse({'detail': 'Poll not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Poll not found")}, status=HTTP_404_NOT_FOUND)
         self.check_object_permissions(request, poll)
 
         serializer: PollSerailizer = PollSerailizer(
@@ -1099,9 +1102,10 @@ class PollViewSet(ViewSet):
             **kwargs: dict[str, Any],
     ) -> DRFResponse:
         """Delete poll"""
-        poll = Poll.objects.select_related("post__author").filter(pk=kwargs['pk']).first()
+        poll = Poll.objects.select_related(
+            "post__author").filter(pk=kwargs['pk']).first()
         if not poll:
-            return DRFResponse({'detail': 'Poll not found'}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse({'detail': _("Poll not found")}, status=HTTP_404_NOT_FOUND)
         self.check_object_permissions(request, poll)
 
         poll.delete()
