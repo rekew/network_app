@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 # THIRD PARTY
 from rest_framework import status
+from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -16,6 +17,7 @@ from rest_framework.request import Request
 from rest_framework.generics import CreateAPIView
 
 from rest_framework_simplejwt.views import TokenObtainPairView
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse
 
 from typing import Any
 
@@ -51,10 +53,27 @@ from apps.notifications.services import dispatch_moderation_report
 # AUTH
 # ---------------------------------------------------
 
+@extend_schema(
+    summary="Register a new user",
+    description=(
+        "Create a new user account using email and username. "
+        "A profile is created automatically for each new user."
+    ),
+    request=RegisterSerializer,
+    responses={201: CustomUserSerializer},
+)
 class RegisterView(CreateAPIView):
     serializer_class = RegisterSerializer
 
 
+@extend_schema(
+    summary="Obtain JWT access and refresh tokens",
+    description=(
+        "Authenticate using email and password to receive access and refresh tokens."
+    ),
+    request=CustomTokenObtainPairSerializer,
+    responses={200: OpenApiResponse(description="JWT tokens")},
+)
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
@@ -63,6 +82,22 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 # USER
 # ---------------------------------------------------
 
+@extend_schema_view(
+    retrieve=extend_schema(
+        summary="Retrieve authenticated user",
+        responses={200: CustomUserSerializer},
+    ),
+    update=extend_schema(
+        summary="Update authenticated user",
+        request=UpdateUserSerializer,
+        responses={200: CustomUserSerializer},
+    ),
+    destroy=extend_schema(
+        summary="Deactivate authenticated user",
+        responses={204: OpenApiResponse(description="User deactivated")},
+    ),
+)
+@extend_schema(tags=["Auth"])
 class UserViewSet(GenericViewSet):
 
     """
@@ -116,6 +151,22 @@ class UserViewSet(GenericViewSet):
 # PROFILE
 # ---------------------------------------------------
 
+@extend_schema_view(
+    retrieve=extend_schema(
+        summary="Retrieve authenticated user profile",
+        responses={200: ProfileSerializer},
+    ),
+    update=extend_schema(
+        summary="Update authenticated user profile",
+        request=UpdateProfileSerializer,
+        responses={200: ProfileSerializer},
+    ),
+    destroy=extend_schema(
+        summary="Deactivate profile",
+        responses={204: OpenApiResponse(description="Profile deactivated")},
+    ),
+)
+@extend_schema(tags=["Auth"])
 class ProfileViewSet(GenericViewSet):
 
     """
@@ -168,6 +219,26 @@ class ProfileViewSet(GenericViewSet):
 # FRIENDSHIP
 # ---------------------------------------------------
 
+@extend_schema_view(
+    list=extend_schema(
+        summary="List user friendships",
+        responses={200: FriendshipSerializer(many=True)},
+    ),
+    create=extend_schema(
+        summary="Send a friend request",
+        request=CreateFriendshipSerializer,
+        responses={201: FriendshipSerializer},
+    ),
+    retrieve=extend_schema(
+        summary="Retrieve a friendship record",
+        responses={200: FriendshipSerializer},
+    ),
+    destroy=extend_schema(
+        summary="Remove a friendship",
+        responses={204: OpenApiResponse(description="Friendship removed")},
+    ),
+)
+@extend_schema(tags=["Auth"])
 class FriendshipViewSet(ModelViewSet):
     """
     ViewSet to add friends
@@ -201,7 +272,7 @@ class FriendshipViewSet(ModelViewSet):
 
         return FriendshipSerializer
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: ModelSerializer) -> None:
 
         receiver_id = self.request.data.get("receiver")
 
@@ -229,6 +300,26 @@ class FriendshipViewSet(ModelViewSet):
 # USER BLOCK
 # ---------------------------------------------------
 
+@extend_schema_view(
+    list=extend_schema(
+        summary="List blocked users",
+        responses={200: UserBlockSerializer(many=True)},
+    ),
+    create=extend_schema(
+        summary="Block a user",
+        request=CreateUserBlockSerializer,
+        responses={201: UserBlockSerializer},
+    ),
+    retrieve=extend_schema(
+        summary="Retrieve a blocked user record",
+        responses={200: UserBlockSerializer},
+    ),
+    destroy=extend_schema(
+        summary="Unblock a user",
+        responses={204: OpenApiResponse(description="User unblocked")},
+    ),
+)
+@extend_schema(tags=["Auth"])
 class UserBlockViewSet(ModelViewSet):
     """
     ViewSet to block user
@@ -256,7 +347,7 @@ class UserBlockViewSet(ModelViewSet):
 
         return UserBlockSerializer
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: ModelSerializer) -> None:
 
         blocked_id = self.request.data.get("blocked_id")
 
@@ -282,6 +373,18 @@ class UserBlockViewSet(ModelViewSet):
 # ACTIVITY LOG
 # ---------------------------------------------------
 
+@extend_schema_view(
+    list=extend_schema(
+        summary="List activity logs",
+        responses={200: ActivityLogSerializer(many=True)},
+    ),
+    create=extend_schema(
+        summary="Create an activity log entry",
+        request=ActivityLogSerializer,
+        responses={201: ActivityLogSerializer},
+    ),
+)
+@extend_schema(tags=["Auth"])
 class ActivityLogViewSet(ModelViewSet):
 
     """
@@ -305,7 +408,7 @@ class ActivityLogViewSet(ModelViewSet):
             .order_by("-created_at")
         )
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: ModelSerializer) -> None:
 
         serializer.save(user=self.request.user)
 
@@ -314,6 +417,27 @@ class ActivityLogViewSet(ModelViewSet):
 # REPORT
 # ---------------------------------------------------
 
+@extend_schema_view(
+    list=extend_schema(
+        summary="List reports",
+        responses={200: ReportSerializer(many=True)},
+    ),
+    create=extend_schema(
+        summary="Submit a report",
+        request=ReportSerializer,
+        responses={201: ReportSerializer},
+    ),
+    retrieve=extend_schema(
+        summary="Retrieve a report",
+        responses={200: ReportSerializer},
+    ),
+    update=extend_schema(
+        summary="Update report status",
+        request=ReportSerializer,
+        responses={200: ReportSerializer},
+    ),
+)
+@extend_schema(tags=["Auth"])
 class ReportViewSet(ModelViewSet):
     """
     ViewSet to report
@@ -338,12 +462,12 @@ class ReportViewSet(ModelViewSet):
 
         return qs.filter(reporter=self.request.user)
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer: ModelSerializer) -> None:
 
         report = serializer.save(reporter=self.request.user)
         dispatch_moderation_report(report)
 
-    def perform_update(self, serializer):
+    def perform_update(self, serializer: ModelSerializer) -> None:
 
         if not self.request.user.is_staff:
             raise ValidationError(

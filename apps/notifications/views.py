@@ -13,14 +13,25 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
+from rest_framework.response import Response as DRFResponse
 
 from typing import Any
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 # PROJECT MODULES
 from .models import Notification
 from .serializers import NotificationSerializer
 
 
+@extend_schema(
+    tags=["Notifications"],
+    summary="Create a notification",
+    request=NotificationSerializer,
+    responses={
+        201: NotificationSerializer,
+        400: OpenApiResponse(description="Invalid request data"),
+    },
+)
 class NotificationCreateView(CreateAPIView):
     """Create notifications from a sender to a recipient."""
 
@@ -40,6 +51,13 @@ class NotificationCreateView(CreateAPIView):
         serializer.save(sender=request.user, user_id=recipient_id)
 
 
+@extend_schema(
+    tags=["Notifications"],
+    summary="List notifications",
+    responses={
+        200: NotificationSerializer(many=True),
+    },
+)
 class NotificationListView(ListAPIView):
     """List notifications for the authenticated recipient."""
 
@@ -63,6 +81,14 @@ class NotificationListView(ListAPIView):
         return qs
 
 
+@extend_schema(
+    tags=["Notifications"],
+    summary="Retrieve or update a notification",
+    responses={
+        200: NotificationSerializer,
+        404: OpenApiResponse(description="Notification not found"),
+    },
+)
 class NotificationDetailView(RetrieveUpdateAPIView):
     """Retrieve or update a single notification for the recipient."""
 
@@ -75,6 +101,14 @@ class NotificationDetailView(RetrieveUpdateAPIView):
         return Notification.objects.filter(user=self.request.user)
 
 
+@extend_schema(
+    tags=["Notifications"],
+    summary="Delete a notification",
+    responses={
+        204: OpenApiResponse(description="Notification deleted"),
+        404: OpenApiResponse(description="Notification not found"),
+    },
+)
 class NotificationDeleteView(DestroyAPIView):
     """Delete a notification for the authenticated recipient."""
 

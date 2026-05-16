@@ -35,21 +35,22 @@ from .serializers import (
 )
 
 # Swagger modules
-from drf_spectacular.utils import extend_schema, OpenApiResponse
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse
 
 
+@extend_schema(tags=["Communities"])
 class CommunityViewSet(ViewSet):
     """ViewSet for handling community related endpoints"""
 
     @extend_schema(
-        summary="Retrieve a single post by ID",
+        summary="Retrieve a community by ID",
         responses={
             HTTP_200_OK: OpenApiResponse(
                 description="Successfully returns the requested community",
                 response=CommunitySerializer,
             ),
-            HTTP_404_NOT_FOUND: OpenApiResponse(
-                description="Event with this ID does not exist",
+            HTTP_404_NOT_FOUND: OpenApiResponse(    
+                description="Community with this ID does not exist",
                 response=CommunityNotFoundSerializer,
             )
         }
@@ -126,13 +127,14 @@ class CommunityViewSet(ViewSet):
 
     @extend_schema(
         summary="Create a Community",
+        request=CommunitySerializer,
         responses={
-            HTTP_200_OK: OpenApiResponse(
+            HTTP_201_CREATED: OpenApiResponse(
                 description="Community successfully created",
                 response=CommunitySerializer,
             ),
             HTTP_404_NOT_FOUND: OpenApiResponse(
-                description="Event with this ID does not exist",
+                description="Community with this ID does not exist",
                 response=CommunityNotFoundSerializer,
             ),
             HTTP_400_BAD_REQUEST: OpenApiResponse(
@@ -141,7 +143,12 @@ class CommunityViewSet(ViewSet):
             ),
         }
     )
-    def create(self, request, *args, **kwargs):
+    def create(
+            self,
+            request: DRFRequest,
+            *args: tuple[Any, ...],
+            **kwargs: dict[str, Any],
+    ) -> DRFResponse:
         """Create a new Community"""
         data = request.data.copy()
         base_slug = slugify(data.get('name', ''))
